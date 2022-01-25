@@ -22,7 +22,7 @@ input {
 	height: 70px;
 	font-size: 2em;
 }
-
+/* 
 p {
 	letter-spacing: -.08em;
 	font-size: 6em;
@@ -33,11 +33,22 @@ p {
 .hollow-text {
 	-webkit-text-fill-color: white; /* Will override color (regardless of order) */
 	-webkit-text-stroke-width: 1px;
-}
+} */
 
 #result-section {
 	padding-top: 3em;
 	padding-left: 3.7em;
+}
+
+#export {
+	border: 2px solid black;
+	border-radius: 3px;
+	color: red;
+	font-size: 1.5em;
+	cursor: pointer;
+	text-align: center;
+	padding: 7px;
+	width: 162px;
 }
 
 

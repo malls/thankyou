@@ -42,21 +42,51 @@
 	<label for="highlight-text">Solid Middle Text</label>
 	<br>
 	<input type="text" id="highlight-input" placeholder="Optional"/>
+	<br>
+	<br>
+	<div id="export">Save Image</div>
+	<br>
 
-	<div id="result-section">
+	<div id="result-section"></div>
 
-		<p class="hollow-text">THANK YOU</p>
-		<p class="hollow-text">THANK YOU</p>
-		<p class="hollow-text">THANK YOU</p>
-		
-		<p id="filled-text">THANK YOU</p>
-		
-		<p class="hollow-text">THANK YOU</p>
-		<p class="hollow-text">THANK YOU</p>
-		<p class="hollow-text">THANK YOU</p>
+	<br>
+	<svg viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+		<style>
+			@font-face {
+				font-family: 'Helvetica Black';
+				src: url('Helvetica-Black.woff2') format('woff2'),
+					url('Helvetica-Black.woff') format('woff');
+				font-weight: 900;
+				font-style: normal;
+				font-display: swap;
+			}
+			
+			text {
+				letter-spacing: -.08em;
+				font-size: 6em;
+				fill: red;
+			}
+
+			.hollow-text {
+				fill: white;
+				stroke-width: 1px;
+				stroke: red;
+			}
+			
+		</style>
+	
+		<text x="0" y="80" class="hollow-text"> THANK YOU</text>
+		<text x="0" y="148" class="hollow-text"> THANK YOU</text>
+		<text x="0" y="216" class="hollow-text"> THANK YOU</text>
+		<text x="0" y="284" id="filled-text"> THANK YOU</text>
+		<text x="0" y="352" class="hollow-text"> THANK YOU</text>
+		<text x="0" y="420" class="hollow-text"> THANK YOU</text>
+		<text x="0" y="488" class="hollow-text"> THANK YOU</text>
+	
+	</svg>
 
 
-	</div>
+
 
 </body>
 

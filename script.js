@@ -9,7 +9,7 @@ window.onload = function() {
 	function resetAll(selector) {
 		Array
 			.from(document.querySelectorAll(selector))
-			.forEach(p => p.innerHTML = 'THANK YOU');
+			.forEach(t => t.textContent = 'THANK YOU');
 	}
 
 	document
@@ -19,31 +19,63 @@ window.onload = function() {
 			const newMainValue = event.target.value;
 
 			if (!highlightInputValue && !newMainValue) {
-				return resetAll('p');
+				return resetAll('text');
 			} else if (highlightInputValue && !newMainValue) {
 				return resetAll('.hollow-text');
 			}
 
-			let selector = highlightInputValue ? '.hollow-text' : 'p';
+			let selector = highlightInputValue ? '.hollow-text' : 'text';
 
 			Array
 				.from(document.querySelectorAll(selector))
-				.forEach(p => p.innerHTML = newMainValue.toUpperCase());
+				.forEach(t => t.textContent = newMainValue.toUpperCase());
 		});
 
 	document
 		.querySelector('#highlight-input')
 		.addEventListener('keyup', event => {
 			if (event.target.value) {
-				document.querySelector('#filled-text').innerHTML = event.target.value.toUpperCase();
+				document.querySelector('#filled-text').textContent = event.target.value.toUpperCase();
 
-			} else if (!event.target.value && document.querySelector('p').innerHTML) {
-				console.log('it is empty and there is other html')
-				document.querySelector('#filled-text').innerHTML = document.querySelector('p').innerHTML;
+			} else if (!event.target.value && document.querySelector('text').textContent) {
+				document.querySelector('#filled-text').textContent = document.querySelector('text').innerHTML;
 			} else {
 				resetAll();
 			}
 
 		});
+
+
+	document
+		.getElementById('export')
+		.addEventListener('click', async event => {
+			const svg = document.querySelector('svg');
+			const { width, height } = svg.getBBox();
+
+			const clone = svg.cloneNode(true);
+			const blob = new Blob([clone.outerHML], { type: 'image/svg+xml;charset=utf-8'});
+			let URL = window.URL || window.webkitURL || window;
+			let blobURL = URL.createObjectURL(blob);
+
+			// window.location = blobURL
+
+			let image = createEmptyImage(Math.ceil(width), Math.ceil(height));
+			console.log(image)
+			image.src = blobURL;
+			document.getElementById('result-section').appendChild(image);
+		});
+
+
+		function createEmptyImage(width, height) {
+			let img = new Image();
+			img.onload = () => {
+				let canvas = document.createElement('canvas');
+				canvas.width = width;
+				canvas.height = height;
+				let context = canvas.getContext('2d');
+				context.drawImage(img, 0, 0, width, height);
+			}
+			return img;
+		}
 
 }
