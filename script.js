@@ -50,20 +50,22 @@ window.onload = function() {
 		.getElementById('export')
 		.addEventListener('click', async event => {
 			const svg = document.querySelector('svg');
-			const { width, height } = svg.getBBox();
-
-			const clone = svg.cloneNode(true);
-			const blob = new Blob([clone.outerHML], { type: 'image/svg+xml;charset=utf-8'});
-			let URL = window.URL || window.webkitURL || window;
-			let blobURL = URL.createObjectURL(blob);
-
-			// window.location = blobURL
+			let { blobUrl, width, height } = convertSvgToBlob(svg);
 
 			let image = createEmptyImage(Math.ceil(width), Math.ceil(height));
 			console.log(image)
-			image.src = blobURL;
+			image.src = blobUrl;
 			document.getElementById('result-section').appendChild(image);
 		});
+
+		function convertSvgToBlob(svg) {
+			const { width, height } = svg.getBBox();
+			const clone = svg.cloneNode(true);
+			const blob = new Blob([clone.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
+			const URL = window.URL || window.webkitURL || window;
+			const blobUrl = URL.createObjectURL(blob);
+			return { blobUrl, width, height };
+		}
 
 
 		function createEmptyImage(width, height) {
