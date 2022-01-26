@@ -1,38 +1,17 @@
-@font-face {
-    font-family: 'Helvetica Black';
-    src: url('Helvetica-Black.woff2') format('woff2'),
-        url('Helvetica-Black.woff') format('woff');
-    font-weight: 900;
-    font-style: normal;
-    font-display: swap;
-}
-
 body {
 	font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;
 }
 
 input {
 	box-sizing: border-box;
+	font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;
 	padding:10px;
 	border: 1px solid red;
 	border-radius: 3px;
-	font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;
 	margin:10px 0;
 	width: 400px;
 	height: 70px;
 	font-size: 2em;
-}
-
-p {
-	letter-spacing: -.08em;
-	font-size: 6em;
-	color: red;
-	margin: -.62em;
-}
-
-.hollow-text {
-	-webkit-text-fill-color: white; /* Will override color (regardless of order) */
-	-webkit-text-stroke-width: 1px;
 }
 
 #result-section {
@@ -40,7 +19,16 @@ p {
 	padding-left: 3.7em;
 }
 
-
+#export {
+	border: 2px solid black;
+	border-radius: 3px;
+	color: red;
+	font-size: 1.5em;
+	cursor: pointer;
+	text-align: center;
+	padding: 7px;
+	width: 162px;
+}
 
 @media only screen and (max-width: 600px) {
 	p {
