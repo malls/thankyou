@@ -1,5 +1,7 @@
 window.onload = function() {
 	const DEFAULT = 'THANK YOU';
+	const RIGHT_PAD_AMOUNT = 50;
+	resizeSVG();
 
 	Array
 		.from(document.querySelectorAll('input'))
@@ -10,6 +12,7 @@ window.onload = function() {
 		Array
 			.from(document.querySelectorAll(selector))
 			.forEach(t => t.textContent = 'THANK YOU');
+		resizeSVG();
 	}
 
 	document
@@ -17,6 +20,7 @@ window.onload = function() {
 		.addEventListener('keyup', event => {
 			const highlightInputValue = document.querySelector('#highlight-input').value;
 			const newMainValue = event.target.value;
+			if (newMainValue.length > 10) return;
 
 			if (!highlightInputValue && !newMainValue) {
 				return resetAll('text');
@@ -29,16 +33,18 @@ window.onload = function() {
 			Array
 				.from(document.querySelectorAll(selector))
 				.forEach(t => t.textContent = newMainValue.toUpperCase());
+			resizeSVG();
 		});
 
 	document
 		.querySelector('#highlight-input')
 		.addEventListener('keyup', event => {
-			if (event.target.value) {
+			if (event.target.value && event.target.value.length < 11) {
 				document.querySelector('#filled-text').textContent = event.target.value.toUpperCase();
-
+				resizeSVG();
 			} else if (!event.target.value && document.querySelector('text').textContent) {
 				document.querySelector('#filled-text').textContent = document.querySelector('text').innerHTML;
+				resizeSVG();
 			} else {
 				resetAll();
 			}
@@ -48,36 +54,45 @@ window.onload = function() {
 
 	document
 		.getElementById('export')
-		.addEventListener('click', async event => {
-			const svg = document.querySelector('svg');
-			let { blobUrl, width, height } = convertSvgToBlob(svg);
+		.addEventListener('click', createImage);
 
-			let image = createEmptyImage(Math.ceil(width), Math.ceil(height));
-			console.log(image)
-			image.src = blobUrl;
-			document.getElementById('result-section').appendChild(image);
-		});
 
-		function convertSvgToBlob(svg) {
-			const { width, height } = svg.getBBox();
-			const clone = svg.cloneNode(true);
-			const blob = new Blob([clone.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
-			const URL = window.URL || window.webkitURL || window;
-			const blobUrl = URL.createObjectURL(blob);
-			return { blobUrl, width, height };
+	function resizeSVG() {
+		let svg = document.querySelector('svg');
+		let texts = Array.
+						from(document
+								.querySelectorAll('text'))
+								.map(text => text.getBBox())
+								.sort((a,b) => a.width < b.width);
+
+		const maxTextWidth = Math.ceil(texts[0].width);
+		console.log({maxTextWidth})
+		svg.setAttribute('width', `${maxTextWidth + RIGHT_PAD_AMOUNT}px`);
+	}
+
+	function createImage() {
+		const svg = document.querySelector('svg');
+		let image = new Image();
+		const { width, height } = svg.getBBox();
+		console.log(svg.getBBox())
+		const clone = svg.cloneNode(true);
+		const blob = new Blob([clone.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
+		const URL = window.URL || window.webkitURL || window;
+		const blobUrl = URL.createObjectURL(blob);
+
+		let canvas = document.createElement('canvas');
+		canvas.width = width + RIGHT_PAD_AMOUNT;
+		canvas.height = height;
+		let context = canvas.getContext('2d');
+
+		image.onload = () => {
+			context.drawImage(image, 0, 0);
+			let png = canvas.toDataURL('image/png');
+			document.body.innerHTML = '<img src="'+png+'"/>';
 		}
+		image.src = blobUrl;
 
 
-		function createEmptyImage(width, height) {
-			let img = new Image();
-			img.onload = () => {
-				let canvas = document.createElement('canvas');
-				canvas.width = width;
-				canvas.height = height;
-				let context = canvas.getContext('2d');
-				context.drawImage(img, 0, 0, width, height);
-			}
-			return img;
-		}
+	}
 
 }
