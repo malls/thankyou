@@ -1,6 +1,6 @@
 window.onload = function() {
 	const DEFAULT = 'THANK YOU';
-	const RIGHT_PAD_AMOUNT = 50;
+	const PAD_AMOUNT = 50;
 	resizeSVG();
 
 	Array
@@ -66,8 +66,10 @@ window.onload = function() {
 								.sort((a,b) => a.width < b.width);
 
 		const maxTextWidth = Math.ceil(texts[0].width);
-		console.log({maxTextWidth})
-		svg.setAttribute('width', `${maxTextWidth + RIGHT_PAD_AMOUNT}px`);
+		const maxTextHeight = Math.ceil(texts[0].height); //this will not change between the different lines
+		console.log({maxTextWidth, maxTextHeight})
+		svg.setAttribute('width', `${maxTextWidth + PAD_AMOUNT}px`);
+		svg.setAttribute('height', `${maxTextHeight * 4 + PAD_AMOUNT - 20}px`);
 	}
 
 	function createImage() {
@@ -81,7 +83,7 @@ window.onload = function() {
 		const blobUrl = URL.createObjectURL(blob);
 
 		let canvas = document.createElement('canvas');
-		canvas.width = width + RIGHT_PAD_AMOUNT;
+		canvas.width = width + PAD_AMOUNT;
 		canvas.height = height;
 		let context = canvas.getContext('2d');
 

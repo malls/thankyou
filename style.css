@@ -14,9 +14,8 @@ input {
 	font-size: 2em;
 }
 
-#result-section {
-	padding-top: 3em;
-	padding-left: 3.7em;
+.svg-container {
+	max-width: 100vw;
 }
 
 #export {
@@ -31,17 +30,8 @@ input {
 }
 
 @media only screen and (max-width: 600px) {
-	p {
-		font-size: 3em;
-		margin-left: -45px;
-	}
     input {
 		font-size: 1.5em;
         max-width: 100%;
     }
-
-	#result-section {
-		padding-left: 3em;
-	}
-
 }
