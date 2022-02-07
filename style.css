@@ -14,11 +14,7 @@ input {
 	font-size: 2em;
 }
 
-.svg-container {
-	max-width: 100vw;
-}
-
-#export {
+.styled-button {
 	border: 2px solid black;
 	border-radius: 3px;
 	color: red;
@@ -27,11 +23,18 @@ input {
 	text-align: center;
 	padding: 7px;
 	width: 162px;
+	display: inline;
 }
+
 
 @media only screen and (max-width: 600px) {
     input {
 		font-size: 1.5em;
         max-width: 100%;
     }
+	svg {
+		transform: scale(0.64);
+		transform-origin: top left;
+	}
 }
+
