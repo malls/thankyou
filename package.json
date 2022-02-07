@@ -1,0 +1,24 @@
+{
+  "name": "thankyou",
+  "version": "1.0.0",
+  "description": "Site for generating text in the classic \"THANK YOU\" plastic bag style.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/malls/thankyou.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/malls/thankyou/issues"
+  },
+  "homepage": "https://github.com/malls/thankyou#readme",
+  "dependencies": {
+    "dotenv": "^14.3.2",
+    "express": "^4.17.2",
+    "nodemon": "^2.0.15"
+  }
+}
