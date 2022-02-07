@@ -1,6 +1,7 @@
 window.onload = function() {
-	const DEFAULT = 'THANK YOU';
+	const DEFAULT_COPY = 'THANK YOU';
 	const PAD_AMOUNT = 50;
+	const SCALE_AMOUNT = 2.0
 	resizeSVG();
 
 	Array
@@ -11,7 +12,7 @@ window.onload = function() {
 	function resetAll(selector) {
 		Array
 			.from(document.querySelectorAll(selector))
-			.forEach(t => t.textContent = 'THANK YOU');
+			.forEach(t => t.textContent = DEFAULT_COPY);
 		resizeSVG();
 	}
 
@@ -74,6 +75,7 @@ window.onload = function() {
 
 	function createImage() {
 		const svg = document.querySelector('svg');
+		// svg.setAttribute('transform', `scale(${SCALE_AMOUNT})`);
 		let image = new Image();
 		const { width, height } = svg.getBBox();
 		console.log(svg.getBBox())
@@ -83,8 +85,9 @@ window.onload = function() {
 		const blobUrl = URL.createObjectURL(blob);
 
 		let canvas = document.createElement('canvas');
-		canvas.width = width + PAD_AMOUNT;
-		canvas.height = height;
+		canvas.width = SCALE_AMOUNT * width + PAD_AMOUNT;
+		canvas.height = SCALE_AMOUNT * height;
+		console.log(canvas)
 		let context = canvas.getContext('2d');
 
 		image.onload = () => {

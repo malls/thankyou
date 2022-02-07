@@ -19,7 +19,7 @@ app.use(express.static('public', options));
 
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.redirect('/index.html')
 });
 
 app.listen(port, () => {
