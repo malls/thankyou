@@ -1,5 +1,11 @@
+html, body {
+	height: 100%;
+	width: 100%;
+}
+
 body {
 	font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;
+	overflow: hidden;
 }
 
 input {
@@ -36,7 +42,7 @@ svg {
         max-width: 100%;
     }
 	svg {
-		transform: scale(0.25);
+		transform: scale(0.2);
 	}
 }
 
@@ -46,7 +52,7 @@ svg {
         max-width: 100%;
     }
 	svg {
-		transform: scale(0.5);
+		transform: scale(0.25);
 	}
 }
 
@@ -56,6 +62,6 @@ svg {
         max-width: 100%;
     }
 	svg {
-		transform: scale(0.75);
+		transform: scale(0.3);
 	}
 }

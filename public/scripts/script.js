@@ -1,35 +1,27 @@
 window.onload = function() {
 	const DEFAULT_COPY = 'THANK YOU';
-	const PAD_AMOUNT = 50;
-	const SCALE_AMOUNT = 2.0
+	const PAD_AMOUNT = 100;
+	const STRING_LENGTH_LIMIT = 10;
 	resizeSVG();
 
 	Array
 		.from(document.querySelectorAll('input'))
 		.forEach(input => input.value = '');
 
-
-	function resetAll(selector) {
-		Array
-			.from(document.querySelectorAll(selector))
-			.forEach(t => t.textContent = DEFAULT_COPY);
-		resizeSVG();
-	}
-
 	document
 		.querySelector('#main-input')
 		.addEventListener('keyup', event => {
 			const highlightInputValue = document.querySelector('#highlight-input').value;
 			const newMainValue = event.target.value;
-			if (newMainValue.length > 10) return;
+			if (newMainValue.length > STRING_LENGTH_LIMIT) return;
 
 			if (!highlightInputValue && !newMainValue) {
-				return resetAll('text');
+				return resetAll('tspan');
 			} else if (highlightInputValue && !newMainValue) {
 				return resetAll('.hollow-text');
 			}
 
-			let selector = highlightInputValue ? '.hollow-text' : 'text';
+			let selector = highlightInputValue ? '.hollow-text' : 'tspan';
 
 			Array
 				.from(document.querySelectorAll(selector))
@@ -40,58 +32,61 @@ window.onload = function() {
 	document
 		.querySelector('#highlight-input')
 		.addEventListener('keyup', event => {
-			if (event.target.value && event.target.value.length < 11) {
+			if (event.target.value && event.target.value.length <= STRING_LENGTH_LIMIT) {
 				document.querySelector('#filled-text').textContent = event.target.value.toUpperCase();
 				resizeSVG();
-			} else if (!event.target.value && document.querySelector('text').textContent) {
-				document.querySelector('#filled-text').textContent = document.querySelector('text').innerHTML;
+			} else if (!event.target.value && document.querySelector('tspan').textContent) {
+				document.querySelector('#filled-text').textContent = document.querySelector('tspan').innerHTML;
 				resizeSVG();
 			} else {
 				resetAll();
 			}
-
 		});
-
 
 	document
 		.getElementById('export')
 		.addEventListener('click', createImage);
 
+	function resetAll(selector) {
+		Array
+			.from(document.querySelectorAll(selector))
+			.forEach(t => t.textContent = DEFAULT_COPY);
+		resizeSVG();
+	}
 
 	function resizeSVG() {
 		let svg = document.querySelector('svg');
-		let texts = Array.
-						from(document
-								.querySelectorAll('text'))
-								.map(text => text.getBBox())
-								.sort((a,b) => a.width < b.width);
+		let text = document.querySelector('text').getBBox();
 
-		const maxTextWidth = Math.ceil(texts[0].width);
-		const maxTextHeight = Math.ceil(texts[0].height); //this will not change between the different lines
+		const maxTextWidth = Math.ceil(text.width);
+		const maxTextHeight = Math.ceil(text.height); //this will not change between the different lines
 		console.log({maxTextWidth, maxTextHeight})
-		svg.setAttribute('width', `${maxTextWidth + PAD_AMOUNT}px`);
-		svg.setAttribute('height', `${maxTextHeight * 4 + PAD_AMOUNT - 20}px`);
+		svg.setAttribute('width', `${maxTextWidth}px`);
+		svg.setAttribute('height', `${maxTextHeight}px`);
 	}
 
 	function createImage() {
+		const X_IMAGE_OFFSET = 20;
 		const svg = document.querySelector('svg');
-		// svg.setAttribute('transform', `scale(${SCALE_AMOUNT})`);
+		const text = document.querySelector('text');
 		let image = new Image();
-		const { width, height } = svg.getBBox();
+		const { width } = text.getBBox();
+		const height = document.querySelector('tspan').dy.baseVal[0].value * 7;
 		console.log(svg.getBBox())
+		console.log(text.getBBox())
 		const clone = svg.cloneNode(true);
 		const blob = new Blob([clone.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
 		const URL = window.URL || window.webkitURL || window;
 		const blobUrl = URL.createObjectURL(blob);
 
 		let canvas = document.createElement('canvas');
-		canvas.width = SCALE_AMOUNT * width + PAD_AMOUNT;
-		canvas.height = SCALE_AMOUNT * height;
+		canvas.width = width;
+		canvas.height = height + PAD_AMOUNT;
 		console.log(canvas)
 		let context = canvas.getContext('2d');
 
 		image.onload = () => {
-			context.drawImage(image, 0, 0);
+			context.drawImage(image, X_IMAGE_OFFSET, 0);
 			let png = canvas.toDataURL('image/png');
 			document.body.innerHTML = '<img src="'+png+'"/>';
 		}
