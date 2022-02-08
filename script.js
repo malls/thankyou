@@ -2,18 +2,19 @@ window.onload = function() {
 	const DEFAULT_COPY = 'THANK YOU';
 	const PAD_AMOUNT = 100;
 	const STRING_LENGTH_LIMIT = 10;
-	resizeSVG();
+	const searchParams = new URLSearchParams(window.location.search);
 
-	Array
-		.from(document.querySelectorAll('input'))
-		.forEach(input => input.value = '');
+	init();
 
 	document
 		.querySelector('#main-input')
 		.addEventListener('keyup', event => {
 			const highlightInputValue = document.querySelector('#highlight-input').value;
 			const newMainValue = event.target.value;
-			if (newMainValue.length > STRING_LENGTH_LIMIT) return;
+			if (newMainValue.length >= STRING_LENGTH_LIMIT) {
+
+				return;
+			}
 
 			if (!highlightInputValue && !newMainValue) {
 				return resetAll('tspan');
@@ -26,6 +27,10 @@ window.onload = function() {
 			Array
 				.from(document.querySelectorAll(selector))
 				.forEach(t => t.textContent = newMainValue.toUpperCase());
+			
+			searchParams.set('text', newMainValue);
+			var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+			history.pushState(null, '', newRelativePathQuery);
 			resizeSVG();
 		});
 
@@ -34,9 +39,16 @@ window.onload = function() {
 		.addEventListener('keyup', event => {
 			if (event.target.value && event.target.value.length <= STRING_LENGTH_LIMIT) {
 				document.querySelector('#filled-text').textContent = event.target.value.toUpperCase();
+				searchParams.set('middletext', event.target.value);
+				var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+				history.pushState(null, '', newRelativePathQuery);
+
 				resizeSVG();
 			} else if (!event.target.value && document.querySelector('tspan').textContent) {
 				document.querySelector('#filled-text').textContent = document.querySelector('tspan').innerHTML;
+				searchParams.set('middletext', '');
+				var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+				history.pushState(null, '', newRelativePathQuery);
 				resizeSVG();
 			} else {
 				resetAll();
@@ -46,6 +58,30 @@ window.onload = function() {
 	document
 		.getElementById('export')
 		.addEventListener('click', createImage);
+
+	function init() {
+		Array
+			.from(document.querySelectorAll('input'))
+			.forEach(input => input.value = '');
+
+		if (document.location.search) {
+
+			const queryStrings = Object.fromEntries(searchParams.entries());
+			console.log(queryStrings)
+			document.querySelector('#main-input').value = queryStrings.text;
+
+			Array
+				.from(document.querySelectorAll('tspan'))
+				.forEach(t => t.textContent = queryStrings.text);
+
+			if (queryStrings.middletext) {
+				document.querySelector('#highlight-input').value = queryStrings.middletext;
+				document.getElementById('filled-text').textContent = queryStrings.middletext;
+			}
+		}
+
+		resizeSVG();
+	}
 
 	function resetAll(selector) {
 		Array
