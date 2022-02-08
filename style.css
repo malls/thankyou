@@ -1,5 +1,11 @@
+html, body {
+	height: 100%;
+	width: 100%;
+}
+
 body {
 	font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;
+	overflow: hidden;
 }
 
 input {
@@ -14,6 +20,10 @@ input {
 	font-size: 2em;
 }
 
+svg {
+	transform-origin: top left;
+}
+
 .styled-button {
 	border: 2px solid black;
 	border-radius: 3px;
@@ -26,15 +36,32 @@ input {
 	display: inline;
 }
 
+@media only screen and (max-width: 480px) {
+    input {
+		font-size: 1.25em;
+        max-width: 100%;
+    }
+	svg {
+		transform: scale(0.2);
+	}
+}
 
-@media only screen and (max-width: 600px) {
+@media only screen and (min-width: 481px) {
     input {
 		font-size: 1.5em;
         max-width: 100%;
     }
 	svg {
-		transform: scale(0.64);
-		transform-origin: top left;
+		transform: scale(0.25);
 	}
 }
 
+@media only screen and (min-width: 769px) {
+    input {
+		font-size: 1.75em;
+        max-width: 100%;
+    }
+	svg {
+		transform: scale(0.3);
+	}
+}
