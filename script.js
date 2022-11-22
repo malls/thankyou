@@ -12,7 +12,6 @@ window.onload = function() {
 			const highlightInputValue = document.querySelector('#highlight-input').value;
 			const newMainValue = event.target.value;
 			if (newMainValue.length >= STRING_LENGTH_LIMIT) {
-
 				return;
 			}
 
@@ -37,7 +36,7 @@ window.onload = function() {
 	document
 		.querySelector('#highlight-input')
 		.addEventListener('keyup', event => {
-			if (event.target.value && event.target.value.length <= STRING_LENGTH_LIMIT) {
+			if (event.target.value && event.target.value.length < STRING_LENGTH_LIMIT) {
 				document.querySelector('#filled-text').textContent = event.target.value.toUpperCase();
 				searchParams.set('middletext', event.target.value);
 				var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
