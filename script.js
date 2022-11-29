@@ -33,7 +33,7 @@ window.onload = function() {
 
 			Array
 				.from(document.querySelectorAll(selector))
-				.forEach(t => t.textContent = newMainValue.toUpperCase());
+				.forEach(t => t.textContent = newMainValue);
 			
 			searchParams.set('text', newMainValue);
 			var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
@@ -45,7 +45,7 @@ window.onload = function() {
 		.querySelector('#highlight-input')
 		.addEventListener('keyup', event => {
 			if (event.target.value && event.target.value.length < STRING_LENGTH_LIMIT) {
-				document.querySelector('#filled-text').textContent = event.target.value.toUpperCase();
+				document.querySelector('#filled-text').textContent = event.target.value;
 				searchParams.set('middletext', event.target.value);
 				let newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
 				history.pushState(null, '', newRelativePathQuery);
@@ -71,17 +71,25 @@ window.onload = function() {
 			.from(document.querySelectorAll('input'))
 			.forEach(input => input.value = '');
 
+		
 		if (document.location.search) {
-
 			const queryStrings = Object.fromEntries(searchParams.entries());
-			const mainText = queryStrings.text ? queryStrings.text.toUpperCase() : 'THANK YOU';
+			
+			if (queryStrings.text) {
+				document.querySelector('#main-input').value = queryStrings.text;
 
-			Array
-				.from(document.querySelectorAll('.main-text'))
-				.forEach(t => t.textContent = mainText);
+				Array
+					.from(document.querySelectorAll('.main-text'))
+					.forEach(t => t.textContent = queryStrings.text);
+
+			} else {
+				Array
+					.from(document.querySelectorAll('.main-text'))
+					.forEach(t => t.textContent = 'THANK YOU');
+			}
 
 			if (queryStrings.middletext) {
-				queryStrings.middletext = queryStrings.middletext.toUpperCase();
+				queryStrings.middletext = queryStrings.middletext;
 				document.querySelector('#highlight-input').value = queryStrings.middletext;
 				document.getElementById('filled-text').textContent = queryStrings.middletext;
 			}
