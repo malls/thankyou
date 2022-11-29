@@ -43,8 +43,8 @@ window.onload = function() {
 				history.pushState(null, '', newRelativePathQuery);
 
 				resizeSVG();
-			} else if (!event.target.value && document.querySelector('tspan').textContent) {
-				document.querySelector('#filled-text').textContent = document.querySelector('tspan').innerHTML;
+			} else if (!event.target.value && document.querySelector('.main-text').textContent) {
+				document.querySelector('#filled-text').textContent = document.querySelector('.main-text').innerHTML;
 				searchParams.set('middletext', '');
 				var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
 				history.pushState(null, '', newRelativePathQuery);
