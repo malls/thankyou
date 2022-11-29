@@ -18,6 +18,7 @@ input {
 	width: 400px;
 	height: 70px;
 	font-size: 2em;
+	text-transform: uppercase;
 }
 
 svg {

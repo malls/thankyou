@@ -15,11 +15,19 @@ window.onload = function() {
 				return;
 			}
 
-			if (!highlightInputValue && !newMainValue) {
-				return resetAll('.main-text');
-			} else if (highlightInputValue && !newMainValue) {
-				return resetAll('.hollow');
-			}
+
+			if (!newMainValue) {
+				searchParams.delete('text');
+
+				let newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+				history.pushState(null, '', newRelativePathQuery);
+
+				if (!highlightInputValue) {
+					return resetAll('.main-text');
+				} else if (highlightInputValue) {
+					return resetAll('.hollow');
+				}
+			}				
 
 			let selector = highlightInputValue ? '.hollow' : '.main-text';
 
@@ -39,14 +47,14 @@ window.onload = function() {
 			if (event.target.value && event.target.value.length < STRING_LENGTH_LIMIT) {
 				document.querySelector('#filled-text').textContent = event.target.value.toUpperCase();
 				searchParams.set('middletext', event.target.value);
-				var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+				let newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
 				history.pushState(null, '', newRelativePathQuery);
 
 				resizeSVG();
 			} else if (!event.target.value && document.querySelector('.main-text').textContent) {
 				document.querySelector('#filled-text').textContent = document.querySelector('.main-text').innerHTML;
-				searchParams.set('middletext', '');
-				var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+				searchParams.delete('middletext', '');
+				let newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
 				history.pushState(null, '', newRelativePathQuery);
 				resizeSVG();
 			} else {
@@ -66,12 +74,11 @@ window.onload = function() {
 		if (document.location.search) {
 
 			const queryStrings = Object.fromEntries(searchParams.entries());
-			console.log(queryStrings)
-			document.querySelector('#main-input').value = queryStrings.text.toUpperCase();
+			const mainText = queryStrings.text ? queryStrings.text.toUpperCase() : 'THANK YOU';
 
 			Array
 				.from(document.querySelectorAll('.main-text'))
-				.forEach(t => t.textContent = queryStrings.text.toUpperCase());
+				.forEach(t => t.textContent = mainText);
 
 			if (queryStrings.middletext) {
 				queryStrings.middletext = queryStrings.middletext.toUpperCase();
