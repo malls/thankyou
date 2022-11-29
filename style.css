@@ -21,6 +21,10 @@ input {
 	text-transform: uppercase;
 }
 
+input::placeholder {
+	text-transform: capitalize;
+}
+
 svg {
 	transform-origin: top left;
 }
