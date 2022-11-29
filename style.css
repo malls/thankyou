@@ -36,6 +36,11 @@ svg {
 	display: inline;
 }
 
+.scroller {
+	overflow: auto;
+	height: 100%;
+}
+
 @media only screen and (max-width: 480px) {
     input {
 		font-size: 1.25em;

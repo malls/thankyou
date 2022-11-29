@@ -102,12 +102,12 @@ window.onload = function() {
 	}
 
 	function createImage() {
-		const X_IMAGE_OFFSET = 20;
+		const X_IMAGE_OFFSET = 0;
 		const svg = document.querySelector('svg');
 		const text = document.querySelector('text');
 		let image = new Image();
 		const { width } = text.getBBox();
-		const height = document.querySelector('tspan').dy.baseVal[0].value * 7;
+		const height = document.querySelector('tspan').dy.baseVal[0].value * 7 + 150;
 		console.log(svg.getBBox())
 		console.log(text.getBBox())
 		const clone = svg.cloneNode(true);
@@ -124,7 +124,7 @@ window.onload = function() {
 		image.onload = () => {
 			context.drawImage(image, X_IMAGE_OFFSET, 0);
 			let png = canvas.toDataURL('image/png');
-			document.body.innerHTML = '<img src="'+png+'"/>';
+			document.body.innerHTML = '<div class="scroller"><img src="'+png+'"/></div>';
 		}
 		image.src = blobUrl;
 
