@@ -16,12 +16,12 @@ window.onload = function() {
 			}
 
 			if (!highlightInputValue && !newMainValue) {
-				return resetAll('tspan');
+				return resetAll('.main-text');
 			} else if (highlightInputValue && !newMainValue) {
-				return resetAll('.hollow-text');
+				return resetAll('.hollow');
 			}
 
-			let selector = highlightInputValue ? '.hollow-text' : 'tspan';
+			let selector = highlightInputValue ? '.hollow' : '.main-text';
 
 			Array
 				.from(document.querySelectorAll(selector))
@@ -67,13 +67,14 @@ window.onload = function() {
 
 			const queryStrings = Object.fromEntries(searchParams.entries());
 			console.log(queryStrings)
-			document.querySelector('#main-input').value = queryStrings.text;
+			document.querySelector('#main-input').value = queryStrings.text.toUpperCase();
 
 			Array
-				.from(document.querySelectorAll('tspan'))
-				.forEach(t => t.textContent = queryStrings.text);
+				.from(document.querySelectorAll('.main-text'))
+				.forEach(t => t.textContent = queryStrings.text.toUpperCase());
 
 			if (queryStrings.middletext) {
+				queryStrings.middletext = queryStrings.middletext.toUpperCase();
 				document.querySelector('#highlight-input').value = queryStrings.middletext;
 				document.getElementById('filled-text').textContent = queryStrings.middletext;
 			}
