@@ -1,7 +1,6 @@
 window.onload = function() {
 	const DEFAULT_COPY = 'THANK YOU';
 	const PAD_AMOUNT = 100;
-	const STRING_LENGTH_LIMIT = 10;
 	const searchParams = new URLSearchParams(window.location.search);
 
 	init();
@@ -11,10 +10,6 @@ window.onload = function() {
 		.addEventListener('keyup', event => {
 			const highlightInputValue = document.querySelector('#highlight-input').value;
 			const newMainValue = event.target.value;
-			if (newMainValue.length >= STRING_LENGTH_LIMIT) {
-				return;
-			}
-
 
 			if (!newMainValue) {
 				searchParams.delete('text');
@@ -44,7 +39,7 @@ window.onload = function() {
 	document
 		.querySelector('#highlight-input')
 		.addEventListener('keyup', event => {
-			if (event.target.value && event.target.value.length < STRING_LENGTH_LIMIT) {
+			if (event.target.value) {
 				document.querySelector('#filled-text').textContent = event.target.value;
 				searchParams.set('middletext', event.target.value);
 				let newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();

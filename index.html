@@ -37,11 +37,11 @@
 <body>
 	<label for="hollow-text">Main Text</label>
 	<br>
-	<input type="text" id="main-input" placeholder="Enter Your Text Here" />
+	<input type="text" id="main-input" placeholder="Enter Your Text Here"  maxlength="10"/>
 	<br>
 	<label for="highlight-text">Solid Middle Text</label>
 	<br>
-	<input type="text" id="highlight-input" placeholder="Optional"/>
+	<input type="text" id="highlight-input" placeholder="Optional" maxlength="10"/>
 	<br>
 	<br>
 
@@ -65,6 +65,8 @@
 
 			text {
 				font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;
+				fill: red;
+				stroke: red;
 			}
 
 			.main-text {
@@ -72,9 +74,7 @@
 				stroke-width: 2px;
 				letter-spacing: -.08em;
 				font-size: 20em;
-				fill: red;
 				background-color: white;
-				stroke: red;
 			}
 
 
@@ -83,10 +83,8 @@
 			}
 
 			.bottom-text {
-				fill: black;
 				font-size: 8em;
-				stroke: black;
-				text-align: end;
+				text-align: start;
 			}
 
 			
@@ -101,7 +99,7 @@
 			<tspan x="0" dy="228" class="main-text hollow">THANK YOU</tspan>
 			<tspan x="0" dy="228" class="main-text hollow">THANK YOU</tspan>
 			<tspan x="0" dy="228" class="main-text hollow">THANK YOU</tspan>
-			<tspan dy="150" class="bottom-text">thankyoubag.online</tspan>
+			<tspan x ="28%" dy="150" class="bottom-text">thankyoubag.online</tspan>
 		</text>
 
 	</svg>
