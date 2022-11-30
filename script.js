@@ -104,7 +104,7 @@ window.onload = function() {
 		let svg = document.querySelector('svg');
 		let text = document.querySelector('text').getBBox();
 
-		const maxTextWidth = Math.ceil(text.width);
+		const maxTextWidth = Math.max(Math.ceil(text.width), 2000);
 		const maxTextHeight = Math.ceil(text.height); //this will not change between the different lines
 		console.log({maxTextWidth, maxTextHeight})
 		svg.setAttribute('width', `${maxTextWidth}px`);
