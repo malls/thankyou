@@ -1,0 +1,33 @@
+{
+  "assigned_to": null,
+  "branch_links": [
+    {
+      "branch": "server-setup",
+      "linked_at": "2026-05-05T13:57:31Z",
+      "linked_by": "agent:claude-opus-4-orchestrator",
+      "repo": null
+    }
+  ],
+  "comment_count": 0,
+  "complexity": null,
+  "created_at": "2026-05-05T13:57:27Z",
+  "created_by": "agent:claude-opus-4-orchestrator",
+  "custom_fields": {},
+  "description": null,
+  "done_at": null,
+  "evidence_refs": [],
+  "id": "task_01KQW6VW44Q2CZFM6EM328RFXZ",
+  "last_event_id": "ev_01KQW6X57W5N44NT7HYF2GEBF4",
+  "last_status_changed_at": "2026-05-05T13:58:09Z",
+  "priority": "medium",
+  "relationships_out": [],
+  "reopened_count": 0,
+  "schema_version": 1,
+  "short_id": "TYB-11",
+  "status": "in_progress",
+  "tags": null,
+  "title": "Document commit message convention: prefix with Lattice short ID",
+  "type": "task",
+  "updated_at": "2026-05-05T13:58:09Z",
+  "urgency": null
+}

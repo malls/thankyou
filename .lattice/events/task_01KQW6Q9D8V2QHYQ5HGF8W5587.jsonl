@@ -1,0 +1,1 @@
+{"actor":"dashboard:web","data":{"description":"env vars should be stored in .env, with examples in .env.example","priority":"medium","short_id":"TYB-10","status":"backlog","title":"set up dot env for local testing.","type":"task"},"id":"ev_01KQW6Q9DE4V6C27VX9CAP2GRK","schema_version":1,"task_id":"task_01KQW6Q9D8V2QHYQ5HGF8W5587","ts":"2026-05-05T13:54:57Z","type":"task_created"}
