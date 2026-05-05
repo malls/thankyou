@@ -1,16 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3600 4800" width="3600" height="4800">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {{.ViewBoxWidth}} {{.ViewBoxHeight}}" preserveAspectRatio="xMidYMid meet">
 	<!--
-		Print-ready template. Geometry differs from the in-browser SVG in
-		index.html because the in-browser version has no viewBox and relies
-		on the browser sizing the SVG to its content via getBBox(). resvg
-		can't do that, so we commit to a fixed 3600x4800 (300 DPI 12"x16",
-		Printful's recommended print area) and pin font-size in user units
-		so layout is deterministic across renderers.
+		Print-ready template. Geometry mirrors the in-browser SVG in
+		index.html as closely as possible — same font-size (320 ≈ 20em at
+		16px root), same letter-spacing (-25 ≈ -0.08em at 320), same dy
+		(228 between main lines, 150 to the footer). resvg scales the
+		viewBox up to whatever pixel size the renderer asks for, so we get
+		the same dense, slightly-overlapping look the browser produces
+		without having to commit to print-area pixel coordinates here.
 
-		The 7 main lines each occupy ~ 600 user units of vertical space
-		(font-size 480, dy 600 to give a touch of leading). Bottom credit
-		line sits below at font-size 200. Total content height ~ 4400 of
-		4800, leaving a 400-unit (~ 8%) bottom safety margin.
+		The viewBox width is computed in Go from the longer of MainText
+		and MiddleText (see template.go) — same idea as the browser's
+		getBBox-based dynamic sizing. Each char advances ~240 user units
+		at font-size 320, plus a fixed safety margin. Setting it per-render
+		means short inputs get a tight crop (text fills the canvas) and
+		long inputs get extra width.
+
+		Height 1880 is fixed: ascent room (40) + first cap-height (~234) +
+		6 dy of 228 (1368) + footer dy 150 + footer descent (~80) ≈ 1872.
+		Text starts at y=40 so the first line's cap-top sits cleanly
+		inside the viewBox rather than scraping y=0.
+
+		preserveAspectRatio "meet" letterboxes the SVG into whatever pixel
+		size resvg renders. With output 3600x4800 (aspect 0.75) and viewBox
+		aspect varying with text length, the rendered image gets vertical
+		padding for short inputs (text sits in the upper portion of the
+		canvas) and shrinks horizontally for very long inputs. Either way
+		the text never clips.
 	-->
 	<style>
 		text {
@@ -22,31 +37,30 @@
 		.main-text {
 			text-transform: uppercase;
 			stroke-width: 2px;
-			letter-spacing: -38;
-			font-size: 480;
+			letter-spacing: -25;
+			font-size: 320;
 		}
-
 
 		.hollow {
 			fill: white;
 		}
 
 		.bottom-text {
-			font-size: 200;
+			font-size: 100;
 			text-align: start;
 		}
 	</style>
 	<rect x="0" y="0" width="100%" height="100%" fill="{{.Background}}" />
 
-	<text y="0">
-		<tspan x="0" dy="500" class="main-text hollow">{{.MainText}}</tspan>
-		<tspan x="0" dy="540" class="main-text hollow">{{.MainText}}</tspan>
-		<tspan x="0" dy="540" class="main-text hollow">{{.MainText}}</tspan>
-		<tspan x="0" dy="540" class="main-text" id="filled-text">{{.MiddleText}}</tspan>
-		<tspan x="0" dy="540" class="main-text hollow">{{.MainText}}</tspan>
-		<tspan x="0" dy="540" class="main-text hollow">{{.MainText}}</tspan>
-		<tspan x="0" dy="540" class="main-text hollow">{{.MainText}}</tspan>
-		<tspan x="28%" dy="380" class="bottom-text">thankyoubag.online</tspan>
+	<text y="40">
+		<tspan x="20" dy="228" class="main-text hollow">{{.MainText}}</tspan>
+		<tspan x="20" dy="228" class="main-text hollow">{{.MainText}}</tspan>
+		<tspan x="20" dy="228" class="main-text hollow">{{.MainText}}</tspan>
+		<tspan x="20" dy="228" class="main-text" id="filled-text">{{.MiddleText}}</tspan>
+		<tspan x="20" dy="228" class="main-text hollow">{{.MainText}}</tspan>
+		<tspan x="20" dy="228" class="main-text hollow">{{.MainText}}</tspan>
+		<tspan x="20" dy="228" class="main-text hollow">{{.MainText}}</tspan>
+		<tspan x="200" dy="150" class="bottom-text">thankyoubag.online</tspan>
 	</text>
 
 </svg>
