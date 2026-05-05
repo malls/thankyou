@@ -56,7 +56,22 @@
       "Bash(git commit *)",
       "Bash(./tools/copy-static.sh)",
       "Bash(go list *)",
-      "Bash(xargs kill *)"
+      "Bash(xargs kill *)",
+      "Bash(git check-ignore *)",
+      "Bash(chmod +x /Users/forrest/Code/thankyou/server/tools/run-dev.sh)",
+      "Bash(bash -n /Users/forrest/Code/thankyou/server/tools/run-dev.sh)",
+      "Bash(git -C /Users/forrest/Code/thankyou check-ignore -v .env)",
+      "Bash(git -C /Users/forrest/Code/thankyou check-ignore -v .env.example)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(git -C /Users/forrest/Code/thankyou status --short)",
+      "Bash(git -C /Users/forrest/Code/thankyou commit -m ' *)",
+      "Bash(echo \"---exit:$?\")",
+      "Bash(xxd)",
+      "Bash(curl -s http://localhost:8080/healthz)",
+      "Bash(pkill -f \"go run ./cmd/server\")",
+      "Bash(pkill -f \"exe/server\")",
+      "Bash(/Users/forrest/Code/thankyou/server/tools/run-dev.sh)",
+      "Bash(break)"
     ]
   }
 }
