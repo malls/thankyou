@@ -26,6 +26,13 @@ func NewRouter(h *Handlers) (http.Handler, error) {
 	mux.HandleFunc("GET /api/files/", h.File)
 	mux.HandleFunc("HEAD /api/files/", h.File)
 
+	// Printful integration. The handlers themselves return 503 with file_id
+	// + file_url when h.Printful == nil; the routes are always wired so the
+	// 503 is observable rather than a 404.
+	mux.HandleFunc("POST /api/printful/products", h.CreateTShirt)
+	mux.HandleFunc("GET /api/printful/mockup/", h.MockupStatus)
+	mux.HandleFunc("POST /api/printful/mockup", h.CreateMockupOnly)
+
 	// The fall-through route serves the static site. Anything that didn't
 	// match an /api/ route or /healthz lands here. http.FileServer handles
 	// the "/" -> "index.html" redirect and 404s for missing files.
