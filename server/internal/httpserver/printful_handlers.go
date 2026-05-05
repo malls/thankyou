@@ -179,7 +179,7 @@ func (h *Handlers) CreateTShirt(w http.ResponseWriter, r *http.Request) {
 	}
 
 	publicFileURL := h.publicFileURL(r, hash)
-	externalID := externalIDForHash(hash)
+	externalID := printful.ExternalIDForHash(hash)
 	variantIDs := req.VariantIDs
 	if len(variantIDs) == 0 {
 		variantIDs = printful.DefaultVariantIDs()
@@ -407,26 +407,14 @@ func (h *Handlers) CreateMockupOnly(w http.ResponseWriter, r *http.Request) {
 	h.logf("printful/mockup: hash=%s task_id=%d ok", hash, resp.ID)
 }
 
-// createOrFetchSyncProduct implements the GET-then-POST-if-404 idempotency
-// flow. The singleflight collapses concurrent identical creates so the
-// race-on-404 path doesn't double-create.
+// createOrFetchSyncProduct delegates to printful.Client.CreateOrFetchSyncProduct
+// using the per-handler singleflight so concurrent identical creates collapse
+// to one upstream POST. Kept as a thin wrapper to preserve the call shape and
+// hash parameter — the package helper takes externalID + fileURL + variantIDs
+// (the hash is implicit in externalID via printful.ExternalIDForHash).
 func (h *Handlers) createOrFetchSyncProduct(ctx context.Context, externalID, hash, fileURL string, variantIDs []int) (printful.SyncProductData, error) {
-	v, err, _ := h.Printful.SyncProductSF.Do(externalID, func() (any, error) {
-		// First try GET. 404 → POST; 200 → reuse.
-		existing, err := h.Printful.Client.GetSyncProductByExternalID(ctx, externalID)
-		if err == nil {
-			return existing, nil
-		}
-		if !errors.Is(err, printful.ErrNotFound) {
-			return printful.SyncProductData{}, err
-		}
-		req := buildSyncProductRequest(externalID, hash, fileURL, variantIDs)
-		return h.Printful.Client.CreateSyncProduct(ctx, req)
-	})
-	if err != nil {
-		return printful.SyncProductData{}, err
-	}
-	return v.(printful.SyncProductData), nil
+	_ = hash // signature retained for log/trace symmetry; consumed by externalID
+	return h.Printful.Client.CreateOrFetchSyncProduct(ctx, &h.Printful.SyncProductSF, externalID, fileURL, variantIDs)
 }
 
 // buildMockupRequest constructs the v2 mockup-tasks body for the V1 catalog
@@ -445,58 +433,6 @@ func buildMockupRequest(fileURL string, variantIDs []int) printful.CreateMockupT
 			}},
 		}},
 	}
-}
-
-// buildSyncProductRequest constructs the v1 sync-product body. The
-// sync_variants slice is built from the configured variant ids; each
-// variant gets a unique external_id derived from the design hash + variant id.
-func buildSyncProductRequest(externalID, hash, fileURL string, variantIDs []int) printful.CreateSyncProductRequest {
-	variants := make([]printful.SyncVariant, 0, len(variantIDs))
-	// Walk DefaultVariants for the size labels when the variant_ids match;
-	// fall back to a synthetic suffix otherwise.
-	idToSize := map[int]string{}
-	idToPrice := map[int]string{}
-	for _, dv := range printful.DefaultVariants {
-		idToSize[dv.VariantID] = dv.Size
-		idToPrice[dv.VariantID] = dv.RetailPrice
-	}
-	for _, vid := range variantIDs {
-		size, ok := idToSize[vid]
-		if !ok {
-			size = strconv.Itoa(vid)
-		}
-		price, ok := idToPrice[vid]
-		if !ok {
-			price = printful.DefaultRetailPrice
-		}
-		variants = append(variants, printful.SyncVariant{
-			ExternalID:  externalID + "-" + size,
-			VariantID:   vid,
-			RetailPrice: price,
-			Files: []printful.SyncFile{{
-				Type: "default",
-				URL:  fileURL,
-			}},
-		})
-	}
-	return printful.CreateSyncProductRequest{
-		SyncProduct: printful.SyncProduct{
-			ExternalID: externalID,
-			Name:       printful.DefaultProductName,
-			Thumbnail:  fileURL,
-		},
-		SyncVariants: variants,
-	}
-}
-
-// externalIDForHash derives the deterministic external_id from the design
-// hash. 12 hex chars = 48 bits, collision-resistant for this prototype.
-// "tyb-" prefix makes the ids greppable in the Printful dashboard.
-func externalIDForHash(hash string) string {
-	if len(hash) < 12 {
-		return "tyb-" + hash
-	}
-	return "tyb-" + hash[:12]
 }
 
 // mockupStatusURL is the relative URL the client polls. Server-relative

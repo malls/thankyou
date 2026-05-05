@@ -470,19 +470,12 @@ func TestCreateMockupOnlyUnconfigured503(t *testing.T) {
 	}
 }
 
-// TestExternalIDForHash locks the derivation rule. Same hash → same id;
-// truncates to 12 hex chars + "tyb-" prefix.
-func TestExternalIDForHash(t *testing.T) {
-	cases := []struct {
-		in, want string
-	}{
-		{"deadbeef0123456789abcdef", "tyb-deadbeef0123"},
-		{"abc", "tyb-abc"}, // short hash fallback
-	}
-	for _, tc := range cases {
-		if got := externalIDForHash(tc.in); got != tc.want {
-			t.Errorf("externalIDForHash(%q)=%q, want %q", tc.in, got, tc.want)
-		}
+// TestExternalIDForHashSmoke locks the handler-side use of the package
+// helper: same hash routes to the same id. The deeper coverage of the rule
+// (truncation, prefix, short-hash fallback) lives in printful/sync_test.go.
+func TestExternalIDForHashSmoke(t *testing.T) {
+	if got := printful.ExternalIDForHash("deadbeef0123456789abcdef"); got != "tyb-deadbeef0123" {
+		t.Errorf("got %q, want tyb-deadbeef0123", got)
 	}
 }
 
