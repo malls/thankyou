@@ -24,13 +24,35 @@ The server bakes the static site and the woff font into a single binary via `//g
    go run ./cmd/server
    ```
 
-   Listens on `:8080` by default. Override the port with the `PORT` env var. Override the data directory (default `./data/files`) with `DATA_DIR`. See [server/cmd/server/main.go](server/cmd/server/main.go).
+   Listens on `:8080` by default. Env vars (all optional except where noted):
+
+   - `PORT` — listen port (default `8080`).
+   - `DATA_DIR` — directory for saved PNGs (default `./data/files`).
+   - `PRINTFUL_TOKEN` — Printful bearer token. **Required** for the `/api/printful/*` routes; when unset they return 503 with a usable `file_id`/`file_url` so the rest of the UI still works.
+   - `PRINTFUL_STORE_ID` — optional `X-PF-Store-Id` header for account-level tokens. Store-level tokens leave this empty.
+   - `PUBLIC_BASE_URL` — absolute URL Printful uses to GET the print PNG (e.g. `https://abc.ngrok.app`). When empty, the server falls back to the inbound `Host` header — fine for ngrok/cloudflared but not for plain `localhost`.
+
+   See [server/cmd/server/main.go](server/cmd/server/main.go).
 
 4. Verify:
 
    - `curl http://localhost:8080/healthz` returns `ok`.
    - `http://localhost:8080/` serves the embedded static site.
    - `curl -X POST http://localhost:8080/api/render -d '{"text":"FOO","middletext":"BAR"}'` returns `{"file_id","url"}` and writes `data/files/{hash}.png`. Fetch the PNG at `GET /api/files/{hash}.png`.
+   - `curl -X POST http://localhost:8080/api/printful/products -H 'Content-Type: application/json' -d '{"text":"FOO","middletext":"BAR"}'` — without `PRINTFUL_TOKEN` set, returns `503` with body `{"error":"printful_unconfigured","file_id":"...","file_url":"..."}`. With a valid token + `PUBLIC_BASE_URL`, returns `{"file_id","file_url","sync_product_id","external_id","mockup_task_id","mockup_status_url"}`.
+   - `curl http://localhost:8080/api/printful/mockup/{task_id}` polls a mockup task; pass-through to Printful with the bearer token attached server-side.
+   - `curl -X POST http://localhost:8080/api/printful/mockup -H 'Content-Type: application/json' -d '{"text":"FOO","middletext":"BAR"}'` kicks off a standalone mockup (no sync product); useful for dev previews.
+
+### Printful integration
+
+The `/api/printful/*` routes need both a bearer token AND a public URL Printful can fetch the print PNG from. Either:
+
+- **Local with tunnel:** start an ngrok or cloudflared tunnel pointing at `:8080`, then run with `PRINTFUL_TOKEN=... PUBLIC_BASE_URL=https://your-tunnel.ngrok.app go run ./cmd/server`. Printful will fetch the print file via that URL.
+- **Deployed:** point `PUBLIC_BASE_URL` at your public HTTPS hostname.
+
+When `PRINTFUL_TOKEN` is unset, every `/api/printful/*` route returns 503 with the `file_id`/`file_url` of the saved design so the UI still degrades gracefully — the render path is independent of Printful.
+
+The default catalog is the Bella+Canvas 3001 unisex tee, white, S/M/L/XL — defined in [server/internal/printful/catalog.go](server/internal/printful/catalog.go). The `VariantID` placeholders are `0` and need to be filled in by hand from `GET /products/71` against your Printful account; until then `POST /api/printful/products` will surface a 502 with the upstream 422 message.
 
 Run `go test ./...` from [server/](server/) for unit and golden-file tests.
 
@@ -57,16 +79,25 @@ Run `go test ./...` from [server/](server/) for unit and golden-file tests.
 
   See [server/internal/render/template.go](server/internal/render/template.go) and [server/internal/render/template.svg](server/internal/render/template.svg).
 
-- **HTTP surface.** Exactly four routes wired in [server/internal/httpserver/router.go](server/internal/httpserver/router.go):
+- **HTTP surface.** Routes wired in [server/internal/httpserver/router.go](server/internal/httpserver/router.go):
 
   - `GET /healthz` — liveness check.
   - `POST /api/render` — validate inputs, hash, render, return `{file_id, url}`.
   - `GET|HEAD /api/files/{hash}.png` — stream the saved PNG with the immutable cache header.
+  - `POST /api/printful/products` — render+save, then parallel mockup-task POST + sync-product GET-then-POST against Printful; merged response includes `mockup_status_url` for client polling.
+  - `GET /api/printful/mockup/{task_id}` — pass-through proxy that polls Printful with the bearer token server-side.
+  - `POST /api/printful/mockup` — standalone mockup-only kickoff (accepts `{file_id}` or `{text, middletext}`).
   - `/` — static fall-through serving the embedded site.
 
-  Validation, JSON shaping, body-size limits, and cache headers live in [server/internal/httpserver/handlers.go](server/internal/httpserver/handlers.go).
+  Validation, JSON shaping, body-size limits, and cache headers live in [server/internal/httpserver/handlers.go](server/internal/httpserver/handlers.go); the Printful orchestration in [server/internal/httpserver/printful_handlers.go](server/internal/httpserver/printful_handlers.go).
 
-- **What's deferred.** Printful API integration (mockups, sync products, orders) and the deploy + DNS cutover from GitHub Pages to the Go server.
+- **Print file by URL.** Printful's API GETs the print PNG from the URL we hand it, so the file URL on the wire to Printful must be publicly reachable — `PUBLIC_BASE_URL + /api/files/{hash}.png`. The browser keeps seeing the relative URL; the server constructs the absolute URL only for the Printful payload. See [server/internal/httpserver/printful_handlers.go](server/internal/httpserver/printful_handlers.go) `publicFileURL`.
+
+- **Sync-product idempotency.** `external_id = "tyb-" + file_id[:12]` — deterministic from the design. The handler does `GET /store/products/@{external_id}` first; on 404 it POSTs to `/store/products`; on 200 it reuses. A `singleflight` keyed on the external_id collapses concurrent identical creates so the race-on-404 doesn't double-create. See [server/internal/printful/products.go](server/internal/printful/products.go).
+
+- **Parallel Printful fanout.** Mockup-task creation and sync-product creation are independent given the same print PNG, so they run in parallel goroutines via `errgroup`. Partial failures (one succeeded, the other failed) return 502 with a `partial:{...}` block describing what survived; the client retries the failed half.
+
+- **What's deferred.** Order placement and payments, multi-product / variant picker UI, and the deploy + DNS cutover from GitHub Pages to the Go server.
 
 ## Repo layout
 
@@ -80,8 +111,9 @@ The Go server lives under [server/](server/):
 
 - [server/cmd/server/main.go](server/cmd/server/main.go) — entry point, env wiring, signal handling.
 - [server/internal/render/](server/internal/render/) — input validation, hashing, SVG template expansion, resvg rasterisation.
-- [server/internal/httpserver/](server/internal/httpserver/) — router, handlers, embedded-static FS.
+- [server/internal/httpserver/](server/internal/httpserver/) — router, handlers, embedded-static FS, Printful orchestration.
 - [server/internal/files/](server/internal/files/) — content-addressed PNG store with singleflight dedup and atomic writes.
+- [server/internal/printful/](server/internal/printful/) — typed HTTP client for Printful's mockup-task and sync-product endpoints; default catalog config.
 - [server/tools/copy-static.sh](server/tools/copy-static.sh) — refresh the embedded static FS from the repo root.
 - `server/data/files/` — runtime PNG output (gitignored).
 
