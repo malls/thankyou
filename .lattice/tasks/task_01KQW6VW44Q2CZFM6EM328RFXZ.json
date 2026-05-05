@@ -8,26 +8,32 @@
       "repo": null
     }
   ],
-  "comment_count": 0,
+  "comment_count": 1,
   "complexity": null,
   "created_at": "2026-05-05T13:57:27Z",
   "created_by": "agent:claude-opus-4-orchestrator",
   "custom_fields": {},
   "description": null,
-  "done_at": null,
-  "evidence_refs": [],
+  "done_at": "2026-05-05T14:00:53Z",
+  "evidence_refs": [
+    {
+      "id": "ev_01KQW71VMDHA050WF8VANK0TQ9",
+      "role": "review",
+      "source_type": "comment"
+    }
+  ],
   "id": "task_01KQW6VW44Q2CZFM6EM328RFXZ",
-  "last_event_id": "ev_01KQW6X57W5N44NT7HYF2GEBF4",
-  "last_status_changed_at": "2026-05-05T13:58:09Z",
+  "last_event_id": "ev_01KQW724XKPR2RMJ9B0DFH6N2S",
+  "last_status_changed_at": "2026-05-05T14:00:53Z",
   "priority": "medium",
   "relationships_out": [],
   "reopened_count": 0,
   "schema_version": 1,
   "short_id": "TYB-11",
-  "status": "in_progress",
+  "status": "done",
   "tags": null,
   "title": "Document commit message convention: prefix with Lattice short ID",
   "type": "task",
-  "updated_at": "2026-05-05T13:58:09Z",
+  "updated_at": "2026-05-05T14:00:53Z",
   "urgency": null
 }
