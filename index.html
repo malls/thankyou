@@ -48,10 +48,36 @@
 	<br>
 	<br>
 
+	<fieldset id="size-picker" class="size-picker">
+		<legend>Size</legend>
+		<label><input type="radio" name="size" value="S"> S</label>
+		<label><input type="radio" name="size" value="M" checked> M</label>
+		<label><input type="radio" name="size" value="L"> L</label>
+		<label><input type="radio" name="size" value="XL"> XL</label>
+	</fieldset>
+
 	<div id="export" class="styled-button">Save Image</div>
-	<div id="buy-shirt" class="styled-button">Create T-Shirt</div>
+	<div id="buy-shirt" class="styled-button">Buy a Shirt</div>
+	<div id="buy-error" class="buy-error" hidden></div>
 	<br>
 	<br>
+
+	<!--
+		Variant catalog the size-picker resolves to a Printful variant_id.
+		Filled in below by the server-time embed (or hand-authored static
+		copy below). Keep this in sync with server/internal/printful/catalog.go;
+		when the human fills in real Printful variant ids, update this map.
+		The placeholder 0s mean "catalog incomplete" — the server will 503
+		with variant_catalog_incomplete and the front-end shows an error.
+	-->
+	<script id="variant-catalog" type="application/json">
+		{
+			"S": 0,
+			"M": 0,
+			"L": 0,
+			"XL": 0
+		}
+	</script>
 
 	<svg xmlns="http://www.w3.org/2000/svg">
 		<style>

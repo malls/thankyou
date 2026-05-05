@@ -41,6 +41,72 @@ svg {
 	display: inline;
 }
 
+.styled-button.is-loading {
+	opacity: 0.55;
+	pointer-events: none;
+}
+
+.size-picker {
+	border: 2px solid black;
+	border-radius: 3px;
+	display: inline-block;
+	margin: 10px 0;
+	padding: 8px 12px;
+	font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;
+}
+
+.size-picker legend {
+	padding: 0 6px;
+	font-size: 1em;
+}
+
+.size-picker label {
+	display: inline-block;
+	margin-right: 12px;
+	font-size: 1.1em;
+	cursor: pointer;
+}
+
+.size-picker input[type="radio"] {
+	width: auto;
+	height: auto;
+	margin-right: 4px;
+	border: none;
+	padding: 0;
+}
+
+.buy-error {
+	display: block;
+	margin: 10px 0;
+	padding: 10px;
+	border: 1px solid red;
+	color: red;
+	font-size: 1em;
+	max-width: 400px;
+}
+
+.thanks-state {
+	padding: 40px 20px;
+	font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;
+	text-align: center;
+}
+
+.thanks-state h1 {
+	font-size: 2.5em;
+	margin-bottom: 10px;
+}
+
+.thanks-state .cta {
+	display: inline-block;
+	margin-top: 20px;
+	font-size: 1.5em;
+	color: red;
+	text-decoration: none;
+	border: 2px solid black;
+	border-radius: 3px;
+	padding: 8px 18px;
+}
+
 .scroller {
 	overflow: auto;
 	height: 100%;
