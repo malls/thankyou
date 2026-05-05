@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3600 4800" width="3600" height="4800">
+	<!--
+		Print-ready template. Geometry differs from the in-browser SVG in
+		index.html because the in-browser version has no viewBox and relies
+		on the browser sizing the SVG to its content via getBBox(). resvg
+		can't do that, so we commit to a fixed 3600x4800 (300 DPI 12"x16",
+		Printful's recommended print area) and pin font-size in user units
+		so layout is deterministic across renderers.
+
+		The 7 main lines each occupy ~ 600 user units of vertical space
+		(font-size 480, dy 600 to give a touch of leading). Bottom credit
+		line sits below at font-size 200. Total content height ~ 4400 of
+		4800, leaving a 400-unit (~ 8%) bottom safety margin.
+	-->
+	<style>
+		text {
+			font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;
+			fill: red;
+			stroke: red;
+		}
+
+		.main-text {
+			text-transform: uppercase;
+			stroke-width: 2px;
+			letter-spacing: -38;
+			font-size: 480;
+		}
+
+
+		.hollow {
+			fill: white;
+		}
+
+		.bottom-text {
+			font-size: 200;
+			text-align: start;
+		}
+	</style>
+	<rect x="0" y="0" width="100%" height="100%" fill="{{.Background}}" />
+
+	<text y="0">
+		<tspan x="0" dy="500" class="main-text hollow">{{.MainText}}</tspan>
+		<tspan x="0" dy="540" class="main-text hollow">{{.MainText}}</tspan>
+		<tspan x="0" dy="540" class="main-text hollow">{{.MainText}}</tspan>
+		<tspan x="0" dy="540" class="main-text" id="filled-text">{{.MiddleText}}</tspan>
+		<tspan x="0" dy="540" class="main-text hollow">{{.MainText}}</tspan>
+		<tspan x="0" dy="540" class="main-text hollow">{{.MainText}}</tspan>
+		<tspan x="0" dy="540" class="main-text hollow">{{.MainText}}</tspan>
+		<tspan x="28%" dy="380" class="bottom-text">thankyoubag.online</tspan>
+	</text>
+
+</svg>

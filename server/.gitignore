@@ -1,0 +1,7 @@
+# Rendered PNGs are produced at runtime; the testdata fixture stays in git
+# but the live data directory does not.
+/data/files/*.png
+/data/files/*.tmp
+
+# Compiled binaries.
+/bin/
