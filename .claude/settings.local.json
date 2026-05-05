@@ -14,7 +14,10 @@
       "Bash(lattice link *)",
       "Bash(awk 'NR>=1 && NR<=55' /Users/forrest/Code/thankyou/index.html)",
       "WebFetch(domain:help.printful.com)",
-      "WebFetch(domain:www.printful.com)"
+      "WebFetch(domain:www.printful.com)",
+      "Bash(go version *)",
+      "Bash(lattice branch-link *)",
+      "Bash(git add *)"
     ]
   }
 }
