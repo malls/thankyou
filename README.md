@@ -18,13 +18,23 @@ The server bakes the static site and the woff font into a single binary via `//g
 
    See [server/tools/copy-static.sh](server/tools/copy-static.sh). It copies the repo-root static files into [server/internal/httpserver/static/](server/internal/httpserver/static/) so the embed directive in [server/internal/httpserver/static.go](server/internal/httpserver/static.go) picks them up at build time. Re-run this whenever you edit any of [index.html](index.html), [style.css](style.css), [script.js](script.js), [favicon.ico](favicon.ico), [splash.png](splash.png), [Helvetica-Black.woff](Helvetica-Black.woff), or [Helvetica-Black.woff2](Helvetica-Black.woff2).
 
-3. Start the server:
+3. Set up env vars and start the server:
 
    ```
-   go run ./cmd/server
+   cp ../.env.example ../.env
+   # edit ../.env, then:
+   ./tools/run-dev.sh
    ```
 
-   Listens on `:8080` by default. Env vars (all optional except where noted):
+   [server/tools/run-dev.sh](server/tools/run-dev.sh) sources `<repo>/.env` if present and `exec`s `go run ./cmd/server`. The wrapper is the recommended path; if you'd rather not use it:
+
+   ```
+   set -a; source ../.env; set +a; go run ./cmd/server
+   ```
+
+   Or just export the vars by hand. The Go binary itself reads only `os.Getenv` — it does not load `.env` on its own.
+
+   Listens on `:8080` by default. The full key list lives in [.env.example](.env.example); descriptions:
 
    - `PORT` — listen port (default `8080`).
    - `DATA_DIR` — directory for saved PNGs (default `./data/files`).
