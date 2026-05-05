@@ -8,10 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	stripego "github.com/stripe/stripe-go/v82"
-
 	"github.com/forrestalmasi/thankyou/server/internal/printful"
-	tystripe "github.com/forrestalmasi/thankyou/server/internal/stripe"
 )
 
 // MaxWebhookBodyBytes caps the inbound webhook body. Stripe payloads are
@@ -105,8 +102,9 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// Don't echo the upstream error message — could leak diagnostic
 		// detail. The 400 alone is enough; details go to the log.
+		// The wrapped error is tystripe.ErrInvalidSignature; future callers
+		// can errors.Is on it if a finer-grained branch becomes useful.
 		h.logf("stripe/webhook: signature verify failed: %v", err)
-		_ = errors.Is(err, tystripe.ErrInvalidSignature) // explicit: callers can errors.Is on the wrapped err if useful
 		writeError(w, http.StatusBadRequest, "invalid_signature", "", "signature verification failed")
 		return
 	}
@@ -320,7 +318,3 @@ func mapStripeRecipient(s *stripeCheckoutSessionView) printful.OrderRecipient {
 	return r
 }
 
-// _ = stripego.Event{} — silence unused-import detection in case a future
-// edit drops the only stripego ref above. (No real overhead; Go will
-// optimise the discard away.)
-var _ = stripego.Event{}
