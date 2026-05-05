@@ -50,7 +50,11 @@
       "Bash(kill 74542)",
       "Bash(lsof -ti:8080)",
       "Bash(xargs -r kill -9)",
-      "Bash(git log *)"
+      "Bash(git log *)",
+      "Bash(lattice create *)",
+      "Bash(git reset *)",
+      "Bash(git commit *)",
+      "Bash(./tools/copy-static.sh)"
     ]
   }
 }

@@ -1,0 +1,32 @@
+{
+  "assigned_to": null,
+  "branch_links": [],
+  "comment_count": 2,
+  "complexity": null,
+  "created_at": "2026-05-05T05:36:08Z",
+  "created_by": "agent:claude-opus-4-orchestrator",
+  "custom_fields": {},
+  "description": null,
+  "done_at": "2026-05-05T05:43:35Z",
+  "evidence_refs": [
+    {
+      "id": "ev_01KQVAKG84MY9F778S5BAB9FBC",
+      "role": "review",
+      "source_type": "comment"
+    }
+  ],
+  "id": "task_01KQVA5XQC3AB6S0YP449GNARY",
+  "last_event_id": "ev_01KQVAKJQVFSF7DHFSDEMK7DR1",
+  "last_status_changed_at": "2026-05-05T05:43:35Z",
+  "priority": "medium",
+  "relationships_out": [],
+  "reopened_count": 0,
+  "schema_version": 1,
+  "short_id": "TYB-7",
+  "status": "done",
+  "tags": null,
+  "title": "Document server architecture and run steps in root README",
+  "type": "task",
+  "updated_at": "2026-05-05T05:43:35Z",
+  "urgency": null
+}
