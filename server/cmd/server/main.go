@@ -6,8 +6,16 @@
 //
 // Environment variables:
 //
-//	PORT       — listen port; defaults to 8080.
-//	DATA_DIR   — directory for saved PNGs; defaults to ./data/files.
+//	PORT              — listen port; defaults to 8080.
+//	DATA_DIR          — directory for saved PNGs; defaults to ./data/files.
+//	PRINTFUL_TOKEN    — Printful bearer token. When unset, the
+//	                    /api/printful/* routes return 503 with the saved
+//	                    file_id/file_url so the UI degrades gracefully.
+//	PRINTFUL_STORE_ID — optional X-PF-Store-Id header (account-level tokens).
+//	PUBLIC_BASE_URL   — absolute URL Printful uses to GET the print PNG
+//	                    (e.g. https://abc.ngrok.app). When empty, the
+//	                    server falls back to the inbound Host header,
+//	                    which only works if it's a public hostname.
 package main
 
 import (
@@ -22,6 +30,7 @@ import (
 
 	"github.com/forrestalmasi/thankyou/server/internal/files"
 	"github.com/forrestalmasi/thankyou/server/internal/httpserver"
+	"github.com/forrestalmasi/thankyou/server/internal/printful"
 	"github.com/forrestalmasi/thankyou/server/internal/render"
 )
 
@@ -49,10 +58,17 @@ func main() {
 		}
 	}()
 
+	// Printful is optional. Missing token → handlers see nil and 503 the
+	// /api/printful/* routes with file_id+file_url so the UI still works.
+	// We don't fatal-fail the boot for it; the render path is independently
+	// useful in dev.
+	pfSetup := buildPrintful(logger)
+
 	handler, err := httpserver.NewRouter(&httpserver.Handlers{
 		Renderer: renderer,
 		Store:    store,
 		Logger:   logger,
+		Printful: pfSetup,
 	})
 	if err != nil {
 		logger.Fatalf("init router: %v", err)
@@ -103,4 +119,41 @@ func envOr(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+// buildPrintful constructs the optional Printful integration from env. Returns
+// nil when PRINTFUL_TOKEN is unset; the handler layer detects nil and 503s
+// the /api/printful/* routes with the saved file_id/file_url. Logs a warning
+// (no token leaked) when PUBLIC_BASE_URL is empty so a misconfigured deploy
+// fails loudly at boot rather than producing async file-fetch errors on
+// Printful's side.
+func buildPrintful(logger *log.Logger) *httpserver.PrintfulSetup {
+	token := os.Getenv("PRINTFUL_TOKEN")
+	if token == "" {
+		logger.Printf("PRINTFUL_TOKEN unset; /api/printful/* will 503 (render path still works)")
+		return nil
+	}
+	storeID := os.Getenv("PRINTFUL_STORE_ID")
+	publicBaseURL := os.Getenv("PUBLIC_BASE_URL")
+	if publicBaseURL == "" {
+		logger.Printf("WARNING: PRINTFUL_TOKEN set but PUBLIC_BASE_URL empty; " +
+			"falling back to inbound Host header. Printful will fail to fetch " +
+			"the print file unless the inbound Host is publicly reachable " +
+			"(ngrok/cloudflared/deploy).")
+	}
+	c, err := printful.New(printful.Config{
+		Token:   token,
+		StoreID: storeID,
+		Logger:  logger,
+	})
+	if err != nil {
+		// Should not happen — token is non-empty above. Log and skip.
+		logger.Printf("printful.New: %v; /api/printful/* will 503", err)
+		return nil
+	}
+	logger.Printf("printful integration enabled (store_id=%q, public_base_url=%q)", storeID, publicBaseURL)
+	return &httpserver.PrintfulSetup{
+		Client:        c,
+		PublicBaseURL: publicBaseURL,
+	}
 }

@@ -63,7 +63,7 @@ window.onload = function () {
 
 	const buyShirt = document.getElementById('buy-shirt');
 	if (buyShirt) {
-		buyShirt.addEventListener('click', requestServerRender);
+		buyShirt.addEventListener('click', createTShirt);
 	}
 
 	function init() {
@@ -115,14 +115,15 @@ window.onload = function () {
 		svg.setAttribute('height', `${maxTextHeight}px`);
 	}
 
-	// requestServerRender POSTs the current text inputs to the Go server's
-	// /api/render endpoint and replaces the page body with the resulting PNG.
-	// Mirrors the look of createImage() but uses the print-quality server
-	// render rather than the in-browser canvas export. The eventual Printful
-	// flow will hand this PNG URL to the mockup endpoint; for now the button
-	// just lets you see what the server produced.
+	// createTShirt POSTs the current text inputs to /api/printful/products,
+	// which renders+saves the PNG and (in parallel) creates a Printful mockup
+	// task and a Printful sync product. On success the page swaps to a status
+	// view showing links and the polled mockup image. The endpoint always
+	// returns a usable file_id/file_url even on the 503 unconfigured path.
+	const MOCKUP_POLL_INTERVAL_MS = 1500;
+	const MOCKUP_POLL_TIMEOUT_MS = 5 * 60 * 1000;
 	let renderInflight = false;
-	async function requestServerRender() {
+	async function createTShirt() {
 		if (renderInflight) return;
 		renderInflight = true;
 		const button = document.getElementById('buy-shirt');
@@ -130,30 +131,138 @@ window.onload = function () {
 		const main = document.querySelector('#main-input').value || '';
 		const middle = document.querySelector('#highlight-input').value || '';
 		try {
-			const resp = await fetch('/api/render', {
+			const resp = await fetch('/api/printful/products', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ text: main, middletext: middle }),
 			});
-			if (!resp.ok) {
-				const err = await resp.text();
-				console.error('render failed', resp.status, err);
-				if (resp.status >= 500) {
-					alert('Something went wrong, please try again.');
-				} else {
-					alert('Render failed: ' + resp.status + ' ' + err);
-				}
+			let data = null;
+			try { data = await resp.json(); } catch (_) { data = {}; }
+
+			if (resp.status === 503) {
+				// Server not configured — show the saved design anyway.
+				renderUnconfigured(data);
 				return;
 			}
-			const data = await resp.json();
-			document.body.innerHTML = '<div class="scroller"><img src="' + data.url + '"/></div>';
+			if (resp.status === 502 && data && data.partial) {
+				renderPartial(data);
+				return;
+			}
+			if (!resp.ok) {
+				const detail = (data && (data.message || data.error)) || resp.statusText;
+				console.error('createTShirt failed', resp.status, detail);
+				alert('Create T-Shirt failed: ' + resp.status + ' ' + detail);
+				return;
+			}
+			renderSuccess(data);
 		} catch (e) {
-			console.error('render error', e);
+			console.error('createTShirt error', e);
 			alert('Something went wrong, please try again.');
 		} finally {
 			renderInflight = false;
 			if (button) button.classList.remove('is-loading');
 		}
+	}
+
+	function renderSuccess(data) {
+		const productLink = data.sync_product_id
+			? '<p><a href="https://www.printful.com/dashboard/sync/products/' + data.sync_product_id + '" target="_blank">Printful product #' + data.sync_product_id + '</a></p>'
+			: '';
+		const fileLink = '<p><a href="' + data.file_url + '" target="_blank">View print file</a></p>';
+		document.body.innerHTML =
+			'<div class="scroller">' +
+			'<h1>T-Shirt Created</h1>' +
+			productLink +
+			fileLink +
+			'<div id="mockup-status"><p>Generating mockup...</p></div>' +
+			'</div>';
+		if (data.mockup_status_url) {
+			pollMockup(data.mockup_status_url);
+		}
+	}
+
+	function renderUnconfigured(data) {
+		const fileLink = data && data.file_url
+			? '<p><a href="' + data.file_url + '" target="_blank">View saved design</a></p>'
+			: '';
+		document.body.innerHTML =
+			'<div class="scroller">' +
+			'<h1>Design saved</h1>' +
+			'<p>Server not configured for Printful — your design was saved.</p>' +
+			fileLink +
+			'</div>';
+	}
+
+	function renderPartial(data) {
+		const p = data.partial || {};
+		const what = [];
+		if (p.mockup_ok) what.push('mockup OK');
+		else what.push('mockup failed');
+		if (p.sync_product_ok) what.push('sync product OK');
+		else what.push('sync product failed');
+		const fileLink = data.file_url
+			? '<p><a href="' + data.file_url + '" target="_blank">View saved design</a></p>'
+			: '';
+		document.body.innerHTML =
+			'<div class="scroller">' +
+			'<h1>T-Shirt created partially</h1>' +
+			'<p>' + what.join(' &middot; ') + '</p>' +
+			fileLink +
+			'<button id="retry-btn" class="styled-button">Retry</button>' +
+			'</div>';
+		const retry = document.getElementById('retry-btn');
+		if (retry) retry.addEventListener('click', () => location.reload());
+	}
+
+	async function pollMockup(statusURL) {
+		const start = Date.now();
+		while (Date.now() - start < MOCKUP_POLL_TIMEOUT_MS) {
+			await new Promise(r => setTimeout(r, MOCKUP_POLL_INTERVAL_MS));
+			let data;
+			try {
+				const resp = await fetch(statusURL);
+				if (!resp.ok) {
+					updateMockupStatus('Mockup polling error: HTTP ' + resp.status);
+					return;
+				}
+				data = await resp.json();
+			} catch (e) {
+				updateMockupStatus('Mockup polling error.');
+				return;
+			}
+			if (data.status === 'completed') {
+				const url = extractMockupURL(data);
+				if (url) {
+					updateMockupStatus('<img src="' + url + '" alt="mockup" style="max-width:100%"/>');
+				} else {
+					updateMockupStatus('Mockup completed but no image URL was returned.');
+				}
+				return;
+			}
+			if (data.status === 'failed') {
+				const reasons = (data.failure_reasons || []).join(', ');
+				updateMockupStatus('Mockup failed' + (reasons ? ': ' + reasons : '.'));
+				return;
+			}
+		}
+		updateMockupStatus('Mockup timed out (5 min).');
+	}
+
+	function extractMockupURL(data) {
+		if (!data || !data.catalog_variant_mockups) return null;
+		for (const v of data.catalog_variant_mockups) {
+			if (!v.mockups) continue;
+			for (const m of v.mockups) {
+				if (m.mockup_url) return m.mockup_url;
+				if (m.placement_url) return m.placement_url;
+			}
+		}
+		return null;
+	}
+
+	function updateMockupStatus(html) {
+		const el = document.getElementById('mockup-status');
+		if (el) el.innerHTML = html;
 	}
 
 	function createImage() {
