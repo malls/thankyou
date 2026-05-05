@@ -8,26 +8,32 @@
       "repo": null
     }
   ],
-  "comment_count": 0,
+  "comment_count": 2,
   "complexity": null,
   "created_at": "2026-05-05T05:57:04Z",
   "created_by": "agent:claude-opus-4-orchestrator",
   "custom_fields": {},
   "description": null,
-  "done_at": null,
-  "evidence_refs": [],
+  "done_at": "2026-05-05T13:52:54Z",
+  "evidence_refs": [
+    {
+      "id": "ev_01KQW6KE654JCDR243DKXG31ED",
+      "role": "review",
+      "source_type": "comment"
+    }
+  ],
   "id": "task_01KQVBC8D52VQPH54NM2JMZE1D",
-  "last_event_id": "ev_01KQVBW7XNZF57QRRAJDQQE5PN",
-  "last_status_changed_at": "2026-05-05T06:05:48Z",
+  "last_event_id": "ev_01KQW6KHE34JX6JK2Q7WFZGBW4",
+  "last_status_changed_at": "2026-05-05T13:52:54Z",
   "priority": "medium",
   "relationships_out": [],
   "reopened_count": 0,
   "schema_version": 1,
   "short_id": "TYB-9",
-  "status": "in_progress",
+  "status": "done",
   "tags": null,
   "title": "Implement Printful API integration to create t-shirts from saved designs",
   "type": "task",
-  "updated_at": "2026-05-05T06:05:48Z",
+  "updated_at": "2026-05-05T13:52:54Z",
   "urgency": null
 }
