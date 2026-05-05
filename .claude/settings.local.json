@@ -54,7 +54,8 @@
       "Bash(lattice create *)",
       "Bash(git reset *)",
       "Bash(git commit *)",
-      "Bash(./tools/copy-static.sh)"
+      "Bash(./tools/copy-static.sh)",
+      "Bash(go list *)"
     ]
   }
 }
