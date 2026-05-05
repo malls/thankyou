@@ -1,0 +1,36 @@
+{
+  "assigned_to": null,
+  "branch_links": [],
+  "comment_count": 0,
+  "complexity": null,
+  "created_at": "2026-05-05T04:08:23Z",
+  "created_by": "system:init",
+  "custom_fields": {},
+  "description": "Somewhere in the backlog, the first true task waits \u2014 not this one (this one is merely a demonstration of potential). When it arrives, greet it with the discipline it deserves: status before action, attribution before execution, breadcrumbs before moving on.",
+  "done_at": null,
+  "evidence_refs": [],
+  "id": "task_01KQV558FDKD7SPCJM3E2TWQ3Q",
+  "last_event_id": "ev_01KQV558FEY94DB9G0DP62W16F",
+  "last_status_changed_at": "2026-05-05T04:08:23Z",
+  "priority": "medium",
+  "relationships_out": [
+    {
+      "created_at": "2026-05-05T04:08:23Z",
+      "created_by": "system:init",
+      "note": null,
+      "target_task_id": "task_01KQV558EHWCRH1PRWKMJ9JHZG",
+      "type": "subtask_of"
+    }
+  ],
+  "reopened_count": 0,
+  "schema_version": 1,
+  "short_id": "TYB-4",
+  "status": "backlog",
+  "tags": [
+    "example"
+  ],
+  "title": "Prepare the first real act of work",
+  "type": "task",
+  "updated_at": "2026-05-05T04:08:23Z",
+  "urgency": null
+}

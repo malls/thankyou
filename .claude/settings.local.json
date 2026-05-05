@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(lattice show *)",
+      "Bash(lattice status *)",
+      "Bash(lattice list *)"
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "assigned_to": null,
+  "branch_links": [],
+  "comment_count": 1,
+  "complexity": null,
+  "created_at": "2026-05-05T04:08:23Z",
+  "created_by": "system:init",
+  "custom_fields": {},
+  "description": "Every system begins as void \u2014 undifferentiated potential. This task marked the first act: choosing a shape for thought to inhabit. The directories were created. The config was written. A mind now has a place to remember.",
+  "done_at": "2026-05-05T04:08:23Z",
+  "evidence_refs": [],
+  "id": "task_01KQV558ERYDPBN98X6PM7JQCY",
+  "last_event_id": "ev_01KQV558FG1GZ3J6HRWEE9ZYWF",
+  "last_status_changed_at": "2026-05-05T04:08:23Z",
+  "priority": "medium",
+  "relationships_out": [
+    {
+      "created_at": "2026-05-05T04:08:23Z",
+      "created_by": "system:init",
+      "note": null,
+      "target_task_id": "task_01KQV558EHWCRH1PRWKMJ9JHZG",
+      "type": "subtask_of"
+    },
+    {
+      "created_at": "2026-05-05T04:08:23Z",
+      "created_by": "system:init",
+      "note": null,
+      "target_task_id": "task_01KQV558F63AGF1NCJ3VMKVZHS",
+      "type": "blocks"
+    }
+  ],
+  "reopened_count": 0,
+  "schema_version": 1,
+  "short_id": "TYB-2",
+  "status": "done",
+  "tags": [
+    "example"
+  ],
+  "title": "Contemplate the architecture of becoming",
+  "type": "task",
+  "updated_at": "2026-05-05T04:08:23Z",
+  "urgency": null
+}
