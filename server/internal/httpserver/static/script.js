@@ -61,6 +61,11 @@ window.onload = function () {
 		.getElementById('export')
 		.addEventListener('click', createImage);
 
+	const buyShirt = document.getElementById('buy-shirt');
+	if (buyShirt) {
+		buyShirt.addEventListener('click', requestServerRender);
+	}
+
 	function init() {
 		Array
 			.from(document.querySelectorAll('input'))
@@ -108,6 +113,35 @@ window.onload = function () {
 		console.log({ maxTextWidth, maxTextHeight })
 		svg.setAttribute('width', `${maxTextWidth}px`);
 		svg.setAttribute('height', `${maxTextHeight}px`);
+	}
+
+	// requestServerRender POSTs the current text inputs to the Go server's
+	// /api/render endpoint and replaces the page body with the resulting PNG.
+	// Mirrors the look of createImage() but uses the print-quality server
+	// render rather than the in-browser canvas export. The eventual Printful
+	// flow will hand this PNG URL to the mockup endpoint; for now the button
+	// just lets you see what the server produced.
+	async function requestServerRender() {
+		const main = document.querySelector('#main-input').value || '';
+		const middle = document.querySelector('#highlight-input').value || '';
+		try {
+			const resp = await fetch('/api/render', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ text: main, middletext: middle }),
+			});
+			if (!resp.ok) {
+				const err = await resp.text();
+				console.error('render failed', resp.status, err);
+				alert('Render failed: ' + resp.status + ' ' + err);
+				return;
+			}
+			const data = await resp.json();
+			document.body.innerHTML = '<div class="scroller"><img src="' + data.url + '"/></div>';
+		} catch (e) {
+			console.error('render error', e);
+			alert('Render error: ' + e.message);
+		}
 	}
 
 	function createImage() {
