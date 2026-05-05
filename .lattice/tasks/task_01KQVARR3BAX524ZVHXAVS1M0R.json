@@ -1,0 +1,32 @@
+{
+  "assigned_to": null,
+  "branch_links": [],
+  "comment_count": 1,
+  "complexity": null,
+  "created_at": "2026-05-05T05:46:25Z",
+  "created_by": "agent:claude-opus-4-orchestrator",
+  "custom_fields": {},
+  "description": null,
+  "done_at": "2026-05-05T05:49:43Z",
+  "evidence_refs": [
+    {
+      "id": "ev_01KQVAYPH9KVDARXAHNDE3SWE1",
+      "role": "review",
+      "source_type": "comment"
+    }
+  ],
+  "id": "task_01KQVARR3BAX524ZVHXAVS1M0R",
+  "last_event_id": "ev_01KQVAYS9AGP0E9KEM0S335ZKA",
+  "last_status_changed_at": "2026-05-05T05:49:43Z",
+  "priority": "medium",
+  "relationships_out": [],
+  "reopened_count": 0,
+  "schema_version": 1,
+  "short_id": "TYB-8",
+  "status": "done",
+  "tags": null,
+  "title": "Add documentation discipline rule to CLAUDE.md and agents.md",
+  "type": "task",
+  "updated_at": "2026-05-05T05:49:43Z",
+  "urgency": null
+}

@@ -6,10 +6,11 @@
     "TYB-4": "task_01KQV558FDKD7SPCJM3E2TWQ3Q",
     "TYB-5": "task_01KQV5FFPB7N0AED49VWMBB5GC",
     "TYB-6": "task_01KQV5WQVAVKRHMKT5B5VA3BSH",
-    "TYB-7": "task_01KQVA5XQC3AB6S0YP449GNARY"
+    "TYB-7": "task_01KQVA5XQC3AB6S0YP449GNARY",
+    "TYB-8": "task_01KQVARR3BAX524ZVHXAVS1M0R"
   },
   "next_seqs": {
-    "TYB": 8
+    "TYB": 9
   },
   "schema_version": 2
 }
