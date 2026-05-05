@@ -41,14 +41,15 @@ type errorResponse struct {
 // Handlers holds the dependencies needed by the HTTP layer. Constructed
 // once in main.go and shared across every request.
 //
-// Printful is optional: nil means "PRINTFUL_TOKEN was unset at boot, the
-// /api/printful/* routes return 503 with the saved file_id/file_url so the
-// UI can still show the rendered design." See printful_handlers.go.
+// Printful and Stripe are independently optional: nil means "the relevant
+// env vars were unset at boot, so the corresponding routes return 503 with
+// a typed error code." See printful_handlers.go and checkout_handlers.go.
 type Handlers struct {
 	Renderer *render.Renderer
 	Store    *files.Store
 	Logger   *log.Logger
 	Printful *PrintfulSetup
+	Stripe   *StripeSetup
 }
 
 // MaxRenderBodyBytes caps the size of a /api/render request body. The legit

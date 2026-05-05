@@ -28,8 +28,11 @@ type SyncProduct struct {
 // SyncVariant is one SKU. variant_id is Printful's catalog variant ID
 // (size + colour for an apparel item). retail_price is a string per the
 // API spec ("25.00"). files[].type is the placement (e.g. "default" or
-// "front"); url is the public PNG URL.
+// "front"); url is the public PNG URL. ID is the per-store sync variant id
+// Printful assigns at create time — read on response, omitted from create
+// requests.
 type SyncVariant struct {
+	ID          int64      `json:"id,omitempty"`
 	ExternalID  string     `json:"external_id"`
 	VariantID   int        `json:"variant_id"`
 	RetailPrice string     `json:"retail_price"`

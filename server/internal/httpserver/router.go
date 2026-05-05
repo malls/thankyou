@@ -33,6 +33,15 @@ func NewRouter(h *Handlers) (http.Handler, error) {
 	mux.HandleFunc("GET /api/printful/mockup/", h.MockupStatus)
 	mux.HandleFunc("POST /api/printful/mockup", h.CreateMockupOnly)
 
+	// Stripe Checkout integration. Same 503-when-unconfigured pattern as
+	// Printful: routes are always wired so a misconfigured deploy gets a
+	// typed JSON error rather than a 404. /api/checkout/start orchestrates
+	// render → Printful sync_product → Stripe Session in one POST;
+	// /api/stripe/webhook receives the signed checkout.session.completed
+	// event and places the Printful order with confirm=true.
+	mux.HandleFunc("POST /api/checkout/start", h.StartCheckout)
+	mux.HandleFunc("POST /api/stripe/webhook", h.StripeWebhook)
+
 	// The fall-through route serves the static site. Anything that didn't
 	// match an /api/ route or /healthz lands here. http.FileServer handles
 	// the "/" -> "index.html" redirect and 404s for missing files.
