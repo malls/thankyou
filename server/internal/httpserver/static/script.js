@@ -121,7 +121,12 @@ window.onload = function () {
 	// render rather than the in-browser canvas export. The eventual Printful
 	// flow will hand this PNG URL to the mockup endpoint; for now the button
 	// just lets you see what the server produced.
+	let renderInflight = false;
 	async function requestServerRender() {
+		if (renderInflight) return;
+		renderInflight = true;
+		const button = document.getElementById('buy-shirt');
+		if (button) button.classList.add('is-loading');
 		const main = document.querySelector('#main-input').value || '';
 		const middle = document.querySelector('#highlight-input').value || '';
 		try {
@@ -133,14 +138,21 @@ window.onload = function () {
 			if (!resp.ok) {
 				const err = await resp.text();
 				console.error('render failed', resp.status, err);
-				alert('Render failed: ' + resp.status + ' ' + err);
+				if (resp.status >= 500) {
+					alert('Something went wrong, please try again.');
+				} else {
+					alert('Render failed: ' + resp.status + ' ' + err);
+				}
 				return;
 			}
 			const data = await resp.json();
 			document.body.innerHTML = '<div class="scroller"><img src="' + data.url + '"/></div>';
 		} catch (e) {
 			console.error('render error', e);
-			alert('Render error: ' + e.message);
+			alert('Something went wrong, please try again.');
+		} finally {
+			renderInflight = false;
+			if (button) button.classList.remove('is-loading');
 		}
 	}
 
