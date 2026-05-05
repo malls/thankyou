@@ -175,6 +175,22 @@ This applies to uncommitted changes in the working tree, unexpected commits on t
 
 When you discover something important about how this project works — a pattern, a gotcha, a convention — **do not save it to auto-memory**. Memory is per-session and per-user; future Lattice agents in other installations will never see it. Instead, add it to this project's `CLAUDE.md` (for project-specific conventions) or propose updating the Lattice template (for universal patterns that should ship with every `lattice init`). The goal: every future agent, in every future installation, benefits from what you learned.
 
+### Documenting Shipped Work
+
+Tasks that ship user-facing functionality or make load-bearing architectural decisions must update the relevant doc before being marked done. For most tasks that means `README.md`; for project-wide conventions or agent-facing rules, it means `CLAUDE.md` (and its mirror, `agents.md`).
+
+**Document:**
+- New endpoints, commands, environment variables, or configuration knobs.
+- Architecture decisions: what was chosen, what was rejected, and *why*. The "why" is the part that ages well — implementation details age out, decision rationale doesn't.
+- Anything a future reader would absorb faster from prose than from reading the code.
+
+**Don't document:**
+- Implementation details visible in well-named code — the code is the source of truth.
+- Task history, who-changed-what, PR rationale — `git log` and Lattice events handle that.
+- Speculative or deferred work — link to the plan file in `.lattice/plans/` instead.
+
+**The review gate enforces this.** The review sub-agent's checklist includes: *did this task ship user-facing functionality or make a load-bearing decision? if so, is the relevant doc updated?* If not, route back as `implementation-level rework needed` with a comment naming the missing doc. The README is the durable artifact future readers hit first; if a shipped feature isn't there, it effectively doesn't exist for them.
+
 ### Quick Reference
 
 ```
