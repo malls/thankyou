@@ -3,7 +3,18 @@
     "allow": [
       "Bash(lattice show *)",
       "Bash(lattice status *)",
-      "Bash(lattice list *)"
+      "Bash(lattice list *)",
+      "Bash(awk 'NR>=50 && NR<=104' /Users/forrest/Code/thankyou/index.html)",
+      "Bash(lattice --help)",
+      "Bash(awk 'NR>=85 && NR<=104' /Users/forrest/Code/thankyou/index.html)",
+      "Bash(awk 'NR>=70 && NR<=90' /Users/forrest/Code/thankyou/index.html)",
+      "Bash(awk 'NR>=56 && NR<=72' /Users/forrest/Code/thankyou/index.html)",
+      "WebFetch(domain:developers.printful.com)",
+      "Bash(lattice comment *)",
+      "Bash(lattice link *)",
+      "Bash(awk 'NR>=1 && NR<=55' /Users/forrest/Code/thankyou/index.html)",
+      "WebFetch(domain:help.printful.com)",
+      "WebFetch(domain:www.printful.com)"
     ]
   }
 }

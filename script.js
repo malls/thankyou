@@ -1,4 +1,4 @@
-window.onload = function() {
+window.onload = function () {
 	const DEFAULT_COPY = 'THANK YOU';
 	const PAD_AMOUNT = 100;
 	const searchParams = new URLSearchParams(window.location.search);
@@ -22,14 +22,14 @@ window.onload = function() {
 				} else if (highlightInputValue) {
 					return resetAll('.hollow');
 				}
-			}				
+			}
 
 			let selector = highlightInputValue ? '.hollow' : '.main-text';
 
 			Array
 				.from(document.querySelectorAll(selector))
 				.forEach(t => t.textContent = newMainValue);
-			
+
 			searchParams.set('text', newMainValue);
 			var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
 			history.pushState(null, '', newRelativePathQuery);
@@ -66,10 +66,9 @@ window.onload = function() {
 			.from(document.querySelectorAll('input'))
 			.forEach(input => input.value = '');
 
-		
 		if (document.location.search) {
 			const queryStrings = Object.fromEntries(searchParams.entries());
-			
+
 			if (queryStrings.text) {
 				document.querySelector('#main-input').value = queryStrings.text;
 
@@ -106,7 +105,7 @@ window.onload = function() {
 
 		const maxTextWidth = Math.max(Math.ceil(text.width), 2000);
 		const maxTextHeight = Math.ceil(text.height); //this will not change between the different lines
-		console.log({maxTextWidth, maxTextHeight})
+		console.log({ maxTextWidth, maxTextHeight })
 		svg.setAttribute('width', `${maxTextWidth}px`);
 		svg.setAttribute('height', `${maxTextHeight}px`);
 	}
@@ -134,10 +133,9 @@ window.onload = function() {
 		image.onload = () => {
 			context.drawImage(image, X_IMAGE_OFFSET, 0);
 			let png = canvas.toDataURL('image/png');
-			document.body.innerHTML = '<div class="scroller"><img src="'+png+'"/></div>';
+			document.body.innerHTML = '<div class="scroller"><img src="' + png + '"/></div>';
 		}
 		image.src = blobUrl;
-
 
 	}
 

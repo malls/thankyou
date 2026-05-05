@@ -1,0 +1,34 @@
+{
+  "assigned_to": null,
+  "branch_links": [],
+  "comment_count": 3,
+  "complexity": null,
+  "created_at": "2026-05-05T04:21:13Z",
+  "created_by": "dashboard:web",
+  "custom_fields": {},
+  "description": "There are two options - first, we could create a datauri on the front end and send it to the server to send to printful. \n\nSecond, we could send just the text from the front end, and create a PNG on the server, then send it to printful.\n\nIdeally, we'd sign requests to Printful and make requests on the client side, but I'm not sure their API allows this.",
+  "done_at": null,
+  "evidence_refs": [],
+  "id": "task_01KQV5WQVAVKRHMKT5B5VA3BSH",
+  "last_event_id": "ev_01KQV706XV60HKXA5AYXM24YCT",
+  "last_status_changed_at": "2026-05-05T04:40:35Z",
+  "priority": "medium",
+  "relationships_out": [
+    {
+      "created_at": "2026-05-05T04:25:20Z",
+      "created_by": "agent:claude-opus-4-orchestrator",
+      "note": null,
+      "target_task_id": "task_01KQV5FFPB7N0AED49VWMBB5GC",
+      "type": "blocks"
+    }
+  ],
+  "reopened_count": 0,
+  "schema_version": 1,
+  "short_id": "TYB-6",
+  "status": "cancelled",
+  "tags": null,
+  "title": "Plan how to process images and send the to printful to create products",
+  "type": "task",
+  "updated_at": "2026-05-05T04:40:35Z",
+  "urgency": null
+}
