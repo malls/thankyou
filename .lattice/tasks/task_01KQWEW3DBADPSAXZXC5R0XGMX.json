@@ -1,0 +1,32 @@
+{
+  "assigned_to": null,
+  "branch_links": [],
+  "comment_count": 6,
+  "complexity": null,
+  "created_at": "2026-05-05T16:17:23Z",
+  "created_by": "agent:claude-opus-4-orchestrator",
+  "custom_fields": {},
+  "description": null,
+  "done_at": "2026-05-05T23:58:52Z",
+  "evidence_refs": [
+    {
+      "id": "ev_01KQX990BGCAFB43T2Q6RRK1A2",
+      "role": "review",
+      "source_type": "comment"
+    }
+  ],
+  "id": "task_01KQWEW3DBADPSAXZXC5R0XGMX",
+  "last_event_id": "ev_01KQX9930VWTJNFQWVNWC383RD",
+  "last_status_changed_at": "2026-05-05T23:58:52Z",
+  "priority": "medium",
+  "relationships_out": [],
+  "reopened_count": 0,
+  "schema_version": 1,
+  "short_id": "TYB-12",
+  "status": "done",
+  "tags": null,
+  "title": "Stripe Checkout integration for buy-now flow",
+  "type": "task",
+  "updated_at": "2026-05-05T23:58:52Z",
+  "urgency": null
+}

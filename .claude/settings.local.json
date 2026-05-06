@@ -71,7 +71,16 @@
       "Bash(pkill -f \"go run ./cmd/server\")",
       "Bash(pkill -f \"exe/server\")",
       "Bash(/Users/forrest/Code/thankyou/server/tools/run-dev.sh)",
-      "Bash(break)"
+      "Bash(break)",
+      "Bash(awk 'NR<=90 || /buy-shirt|buy-now|input|button|export|main-input|highlight-input/' /Users/forrest/Code/thankyou/index.html)",
+      "Bash(go get *)",
+      "Read(//Users/forrest/go/pkg/mod/github.com/stripe/stripe-go/v82@v82.5.1/**)",
+      "Read(//Users/forrest/go/pkg/mod/github.com/stripe/stripe-go/v82@v82.5.1/checkout/session/**)",
+      "Read(//Users/forrest/go/pkg/mod/github.com/stripe/stripe-go/v82@v82.5.1/webhook/**)",
+      "Bash(grep -iE \"\\(client|stripe\\)\\\\\\\\.go$\")",
+      "Bash(go mod *)",
+      "Bash(go vet *)",
+      "Bash(awk 'NR>=40 && NR<=90' /Users/forrest/Code/thankyou/index.html)"
     ]
   }
 }
