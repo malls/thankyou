@@ -3,6 +3,8 @@ package httpserver
 import (
 	"io/fs"
 	"net/http"
+
+	"github.com/forrestalmasi/thankyou/server/public"
 )
 
 // NewRouter returns a configured *http.ServeMux wired with all routes.
@@ -13,11 +15,8 @@ import (
 // justify the dependency, and Go 1.22+'s ServeMux supports method patterns
 // well enough for this surface.
 func NewRouter(h *Handlers) (http.Handler, error) {
-	staticFS, err := StaticFS()
-	if err != nil {
-		return nil, err
-	}
-	staticHandler := http.FileServer(http.FS(staticFS))
+	publicFS := public.FS()
+	staticHandler := http.FileServer(http.FS(publicFS))
 
 	mux := http.NewServeMux()
 
@@ -47,9 +46,10 @@ func NewRouter(h *Handlers) (http.Handler, error) {
 	// the "/" -> "index.html" redirect and 404s for missing files.
 	mux.Handle("/", staticHandler)
 
-	// Verify embed is non-empty so a misconfigured build (forgot to run
-	// copy-static.sh) fails loudly rather than serving 404s for everything.
-	entries, err := fs.ReadDir(staticFS, ".")
+	// Verify embed is non-empty so a corrupted build (somehow stripped of
+	// its baked-in assets) fails loudly rather than serving 404s for
+	// everything.
+	entries, err := fs.ReadDir(publicFS, ".")
 	if err != nil {
 		return nil, err
 	}
@@ -60,12 +60,12 @@ func NewRouter(h *Handlers) (http.Handler, error) {
 	return mux, nil
 }
 
-// errEmbedEmpty signals that the static FS embedded into the binary has zero
-// files — almost certainly because copy-static.sh wasn't run before `go build`.
+// errEmbedEmpty signals that the public FS embedded into the binary has zero
+// files — should be impossible in a clean build; indicates a corrupted binary.
 var errEmbedEmpty = &embedError{}
 
 type embedError struct{}
 
 func (e *embedError) Error() string {
-	return "httpserver: embedded static FS is empty (did you run tools/copy-static.sh?)"
+	return "httpserver: embedded public FS is empty (corrupted build?)"
 }
