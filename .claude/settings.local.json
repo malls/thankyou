@@ -80,7 +80,12 @@
       "Bash(grep -iE \"\\(client|stripe\\)\\\\\\\\.go$\")",
       "Bash(go mod *)",
       "Bash(go vet *)",
-      "Bash(awk 'NR>=40 && NR<=90' /Users/forrest/Code/thankyou/index.html)"
+      "Bash(awk 'NR>=40 && NR<=90' /Users/forrest/Code/thankyou/index.html)",
+      "Bash(lattice plan *)",
+      "Bash(git mv *)",
+      "Bash(curl -s -X POST -H 'Content-Type: application/json' -d '{\"text\":\"FOO\",\"middletext\":\"BAR\"}' http://localhost:8090/api/render)",
+      "Bash(pkill -f \"go-build.*server\")",
+      "Bash(pkill -f \"/cmd/server\")"
     ]
   }
 }
