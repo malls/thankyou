@@ -85,7 +85,20 @@
       "Bash(git mv *)",
       "Bash(curl -s -X POST -H 'Content-Type: application/json' -d '{\"text\":\"FOO\",\"middletext\":\"BAR\"}' http://localhost:8090/api/render)",
       "Bash(pkill -f \"go-build.*server\")",
-      "Bash(pkill -f \"/cmd/server\")"
+      "Bash(pkill -f \"/cmd/server\")",
+      "Bash(nslookup github.com)",
+      "Bash(dscacheutil -q host -a name github.com)",
+      "Bash(ping -c 1 -W 2000 github.com)",
+      "Bash(test -f ~/.ssh/config && grep -i -A 5 \"github\" ~/.ssh/config 2>&1 || echo \"no ~/.ssh/config or no github entries\")",
+      "Read(//Users/forrest/.ssh/**)",
+      "Bash(ssh -T -o ConnectTimeout=8 git@github.com)",
+      "Bash(rm -rf /tmp/tybsmoke /tmp/tyb_server && git status)",
+      "Bash(PRINTFUL_TOKEN=foo go run ./cmd/server)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(STRIPE_SECRET_KEY=sk_test_x go run ./cmd/server)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp/tybsmoke"
     ]
   }
 }
