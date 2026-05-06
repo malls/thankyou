@@ -44,12 +44,17 @@ type errorResponse struct {
 // Printful and Stripe are independently optional: nil means "the relevant
 // env vars were unset at boot, so the corresponding routes return 503 with
 // a typed error code." See printful_handlers.go and checkout_handlers.go.
+//
+// PublicBaseURL is the configured PUBLIC_BASE_URL — required at boot when
+// Printful or Stripe is non-nil. main.go fails fast on the empty-with-
+// upstream case, so the helpers don't accept that combination here.
 type Handlers struct {
-	Renderer *render.Renderer
-	Store    *files.Store
-	Logger   *log.Logger
-	Printful *PrintfulSetup
-	Stripe   *StripeSetup
+	Renderer      *render.Renderer
+	Store         *files.Store
+	Logger        *log.Logger
+	PublicBaseURL string
+	Printful      *PrintfulSetup
+	Stripe        *StripeSetup
 }
 
 // MaxRenderBodyBytes caps the size of a /api/render request body. The legit

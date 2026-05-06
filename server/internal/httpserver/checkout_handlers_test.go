@@ -110,15 +110,18 @@ func newCheckoutHandlers(t *testing.T, sb *stubBackends, includeStripe bool, inc
 	}
 	t.Cleanup(func() { _ = rdr.Close() })
 
-	h := &Handlers{Renderer: rdr, Store: store}
+	h := &Handlers{
+		Renderer:      rdr,
+		Store:         store,
+		PublicBaseURL: "https://public.example.com",
+	}
 	if includePrintful && sb != nil {
 		c, err := printful.New(printful.Config{Token: "tok", BaseURL: sb.printful.URL})
 		if err != nil {
 			t.Fatalf("printful.New: %v", err)
 		}
 		h.Printful = &PrintfulSetup{
-			Client:        c,
-			PublicBaseURL: "https://public.example.com",
+			Client: c,
 		}
 	}
 	if includeStripe && sb != nil {

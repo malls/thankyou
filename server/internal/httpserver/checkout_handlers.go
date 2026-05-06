@@ -159,7 +159,7 @@ func (h *Handlers) StartCheckout(w http.ResponseWriter, r *http.Request) {
 	}
 	relativeFileURL := "/api/files/" + hash + ".png"
 
-	publicFileURL := h.publicFileURL(r, hash)
+	publicFileURL := h.publicFileURL(hash)
 	externalID := printful.ExternalIDForHash(hash)
 
 	// Create-or-fetch the sync_product. Single-variant request: we only need
@@ -193,9 +193,9 @@ func (h *Handlers) StartCheckout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	publicBase := h.publicBaseURL(r)
-	successURL := strings.TrimRight(publicBase, "/") + "/?session_id={CHECKOUT_SESSION_ID}"
-	cancelURL := strings.TrimRight(publicBase, "/") + "/?canceled=1"
+	publicBase := h.publicBaseURL()
+	successURL := publicBase + "/?session_id={CHECKOUT_SESSION_ID}"
+	cancelURL := publicBase + "/?canceled=1"
 
 	params := buildCheckoutSessionParams(checkoutSessionInputs{
 		FileID:        hash,
@@ -403,21 +403,13 @@ func designSummaryName(in render.Inputs) string {
 	return name
 }
 
-// publicBaseURL returns the absolute URL the client should redirect back to
-// after Stripe Checkout. Prefers PUBLIC_BASE_URL when configured (mirrors
-// the Printful publicFileURL); falls back to scheme + Host for tunnels.
-func (h *Handlers) publicBaseURL(r *http.Request) string {
-	if h.Printful != nil && h.Printful.PublicBaseURL != "" {
-		return strings.TrimRight(h.Printful.PublicBaseURL, "/")
-	}
-	scheme := "http"
-	if r.TLS != nil {
-		scheme = "https"
-	}
-	if proto := r.Header.Get("X-Forwarded-Proto"); proto != "" {
-		scheme = proto
-	}
-	return scheme + "://" + r.Host
+// publicBaseURL returns the configured PUBLIC_BASE_URL with any trailing
+// slash trimmed. Used to build Stripe Checkout's success_url and cancel_url.
+// main.go enforces that this is non-empty whenever Stripe is configured, so
+// we never need a Host-header fallback here — a fallback would let an
+// attacker hijack the success_url via a spoofed Host header.
+func (h *Handlers) publicBaseURL() string {
+	return strings.TrimRight(h.PublicBaseURL, "/")
 }
 
 // writeJSON is a small DRY for the response body shape. The callers all

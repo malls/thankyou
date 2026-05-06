@@ -14,9 +14,9 @@
 //	PRINTFUL_STORE_ID     — optional X-PF-Store-Id header (account-level tokens).
 //	PUBLIC_BASE_URL       — absolute URL Printful uses to GET the print PNG
 //	                        and Stripe uses for success_url/cancel_url
-//	                        (e.g. https://abc.ngrok.app). When empty, the
-//	                        server falls back to the inbound Host header,
-//	                        which only works if it's a public hostname.
+//	                        (e.g. https://abc.ngrok.app). Required when
+//	                        STRIPE_SECRET_KEY or PRINTFUL_TOKEN is set;
+//	                        server refuses to boot otherwise.
 //	STRIPE_SECRET_KEY     — Stripe secret/restricted API key. Unset = 503 on
 //	                        /api/checkout/start with stripe_unconfigured.
 //	STRIPE_WEBHOOK_SECRET — signing secret from `stripe listen` (test) or
@@ -53,6 +53,25 @@ func main() {
 	port := envOr("PORT", "8080")
 	dataDir := envOr("DATA_DIR", "./data/files")
 
+	// Read PUBLIC_BASE_URL alongside the upstream credentials so we can fail
+	// fast at boot when the combination is unsafe. The Host-header fallback
+	// that used to live in the helpers is gone — without an explicit base,
+	// an attacker controlling Host: could pin Printful sync_products at an
+	// attacker host or hijack Stripe's success_url.
+	publicBaseURL := os.Getenv("PUBLIC_BASE_URL")
+	stripeKey := os.Getenv("STRIPE_SECRET_KEY")
+	printfulToken := os.Getenv("PRINTFUL_TOKEN")
+	if err := validatePublicBaseURL(publicBaseURL, stripeKey, printfulToken); err != nil {
+		logger.Fatalf("%v", err)
+	}
+	if publicBaseURL == "" {
+		// Render-only mode: neither Stripe nor Printful is configured, so
+		// no URL we hand to a third party gets constructed. Safe to proceed.
+		logger.Printf("PUBLIC_BASE_URL unset (Stripe and Printful both unconfigured; render path only)")
+	}
+	// TODO: reject non-https PUBLIC_BASE_URL when STRIPE_MODE=live; deferred
+	// to a follow-up task.
+
 	store, err := files.New(dataDir)
 	if err != nil {
 		logger.Fatalf("init file store: %v", err)
@@ -75,15 +94,16 @@ func main() {
 	// /api/printful/* routes with file_id+file_url so the UI still works.
 	// We don't fatal-fail the boot for it; the render path is independently
 	// useful in dev.
-	pfSetup := buildPrintful(logger)
-	stripeSetup := buildStripe(logger)
+	pfSetup := buildPrintful(logger, printfulToken)
+	stripeSetup := buildStripe(logger, stripeKey)
 
 	handler, err := httpserver.NewRouter(&httpserver.Handlers{
-		Renderer: renderer,
-		Store:    store,
-		Logger:   logger,
-		Printful: pfSetup,
-		Stripe:   stripeSetup,
+		Renderer:      renderer,
+		Store:         store,
+		Logger:        logger,
+		PublicBaseURL: publicBaseURL,
+		Printful:      pfSetup,
+		Stripe:        stripeSetup,
 	})
 	if err != nil {
 		logger.Fatalf("init router: %v", err)
@@ -136,26 +156,35 @@ func envOr(key, fallback string) string {
 	return fallback
 }
 
+// validatePublicBaseURL fails closed when PUBLIC_BASE_URL is empty while
+// either Stripe or Printful is configured. The Host-header fallback used to
+// silently absorb the empty case, but it's attacker-controllable in non-
+// browser clients (curl Host: evil.example) — a missing base would let an
+// attacker pin Printful's sync_product file URL at their host (durable: keyed
+// on external_id from the design hash) or hijack Stripe's success_url. With
+// neither upstream configured the renderer-only path is safe, so we return
+// nil and let main proceed.
+func validatePublicBaseURL(publicBaseURL, stripeKey, printfulToken string) error {
+	if publicBaseURL != "" {
+		return nil
+	}
+	if stripeKey == "" && printfulToken == "" {
+		return nil
+	}
+	return errors.New("PUBLIC_BASE_URL is required when STRIPE_SECRET_KEY or PRINTFUL_TOKEN is set; " +
+		"refusing to boot to prevent Host-header spoofing of Stripe success_url and Printful print-file URLs")
+}
+
 // buildPrintful constructs the optional Printful integration from env. Returns
 // nil when PRINTFUL_TOKEN is unset; the handler layer detects nil and 503s
-// the /api/printful/* routes with the saved file_id/file_url. Logs a warning
-// (no token leaked) when PUBLIC_BASE_URL is empty so a misconfigured deploy
-// fails loudly at boot rather than producing async file-fetch errors on
-// Printful's side.
-func buildPrintful(logger *log.Logger) *httpserver.PrintfulSetup {
-	token := os.Getenv("PRINTFUL_TOKEN")
+// the /api/printful/* routes with the saved file_id/file_url. The base URL
+// is supplied by the caller (validated upstream in validatePublicBaseURL).
+func buildPrintful(logger *log.Logger, token string) *httpserver.PrintfulSetup {
 	if token == "" {
 		logger.Printf("PRINTFUL_TOKEN unset; /api/printful/* will 503 (render path still works)")
 		return nil
 	}
 	storeID := os.Getenv("PRINTFUL_STORE_ID")
-	publicBaseURL := os.Getenv("PUBLIC_BASE_URL")
-	if publicBaseURL == "" {
-		logger.Printf("WARNING: PRINTFUL_TOKEN set but PUBLIC_BASE_URL empty; " +
-			"falling back to inbound Host header. Printful will fail to fetch " +
-			"the print file unless the inbound Host is publicly reachable " +
-			"(ngrok/cloudflared/deploy).")
-	}
 	c, err := printful.New(printful.Config{
 		Token:   token,
 		StoreID: storeID,
@@ -166,10 +195,9 @@ func buildPrintful(logger *log.Logger) *httpserver.PrintfulSetup {
 		logger.Printf("printful.New: %v; /api/printful/* will 503", err)
 		return nil
 	}
-	logger.Printf("printful integration enabled (store_id=%q, public_base_url=%q)", storeID, publicBaseURL)
+	logger.Printf("printful integration enabled (store_id=%q)", storeID)
 	return &httpserver.PrintfulSetup{
-		Client:        c,
-		PublicBaseURL: publicBaseURL,
+		Client: c,
 	}
 }
 
@@ -183,8 +211,7 @@ func buildPrintful(logger *log.Logger) *httpserver.PrintfulSetup {
 // pass nil so the create-session route degrades to 503 — failing closed is
 // the right behaviour, especially for the live-key-in-dev case where the
 // alternative is taking real-money payments through a misconfigured server.
-func buildStripe(logger *log.Logger) *httpserver.StripeSetup {
-	key := os.Getenv("STRIPE_SECRET_KEY")
+func buildStripe(logger *log.Logger, key string) *httpserver.StripeSetup {
 	if key == "" {
 		logger.Printf("STRIPE_SECRET_KEY unset; /api/checkout/start and /api/stripe/webhook will 503")
 		return nil

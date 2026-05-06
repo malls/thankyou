@@ -95,10 +95,11 @@ func newWebhookHandlers(t *testing.T, ws *webhookStub) *Handlers {
 		t.Fatalf("tystripe.New: %v", err)
 	}
 	return &Handlers{
-		Renderer: rdr,
-		Store:    store,
-		Printful: &PrintfulSetup{Client: pf, PublicBaseURL: "https://public.example.com"},
-		Stripe:   &StripeSetup{Client: sc},
+		Renderer:      rdr,
+		Store:         store,
+		PublicBaseURL: "https://public.example.com",
+		Printful:      &PrintfulSetup{Client: pf},
+		Stripe:        &StripeSetup{Client: sc},
 	}
 }
 

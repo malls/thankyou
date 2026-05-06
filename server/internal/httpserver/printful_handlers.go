@@ -103,9 +103,12 @@ const PrintfulFanoutTimeout = 25 * time.Second
 // PrintfulSetup is the optional dependency block. Constructed in main.go
 // when PRINTFUL_TOKEN is present; left nil otherwise (handlers detect the
 // nil and 503 with file_id+file_url so the UI degrades gracefully).
+//
+// The public base URL used to build file URLs Printful fetches lives on the
+// top-level Handlers struct (Handlers.PublicBaseURL), not here — it's shared
+// with the Stripe success_url/cancel_url builder.
 type PrintfulSetup struct {
-	Client        *printful.Client
-	PublicBaseURL string // e.g. "https://abc123.ngrok.app"; empty falls back to inbound Host
+	Client *printful.Client
 	// SyncProductSF dedupes concurrent identical sync-product creates. The
 	// idempotency flow is GET-then-POST, but two concurrent goroutines can
 	// both see 404 and both POST; singleflight collapses them. Keyed on
@@ -178,7 +181,7 @@ func (h *Handlers) CreateTShirt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	publicFileURL := h.publicFileURL(r, hash)
+	publicFileURL := h.publicFileURL(hash)
 	externalID := printful.ExternalIDForHash(hash)
 	variantIDs := req.VariantIDs
 	if len(variantIDs) == 0 {
@@ -382,7 +385,7 @@ func (h *Handlers) CreateMockupOnly(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	publicFileURL := h.publicFileURL(r, hash)
+	publicFileURL := h.publicFileURL(hash)
 	variantIDs := req.VariantIDs
 	if len(variantIDs) == 0 {
 		variantIDs = printful.DefaultVariantIDs()
@@ -442,24 +445,14 @@ func mockupStatusURL(taskID int64) string {
 }
 
 // publicFileURL builds the absolute URL Printful will GET to fetch the print
-// PNG. Prefers the configured PUBLIC_BASE_URL; falls back to the inbound
-// Host header (best-effort for tunnels that forward the host correctly).
-func (h *Handlers) publicFileURL(r *http.Request, hash string) string {
-	relative := "/api/files/" + hash + ".png"
-	if h.Printful != nil && h.Printful.PublicBaseURL != "" {
-		return strings.TrimRight(h.Printful.PublicBaseURL, "/") + relative
-	}
-	// Best-effort fallback: scheme depends on whether TLS is terminated
-	// upstream. r.TLS == nil for the bare server but a tunnel may still
-	// be HTTPS to Printful — prefer https unless we can confirm http.
-	scheme := "http"
-	if r.TLS != nil {
-		scheme = "https"
-	}
-	if proto := r.Header.Get("X-Forwarded-Proto"); proto != "" {
-		scheme = proto
-	}
-	return scheme + "://" + r.Host + relative
+// PNG. The base is configured at boot (PUBLIC_BASE_URL); main.go fails fast
+// when that env var is empty while Printful or Stripe is configured, so we
+// don't accept the empty case here. The inbound *http.Request is intentionally
+// not consulted — Host is attacker-controlled in non-browser clients and a
+// fallback would let an attacker pin Printful sync_product file URLs at their
+// own host (durable: keyed on external_id derived from the design hash).
+func (h *Handlers) publicFileURL(hash string) string {
+	return strings.TrimRight(h.PublicBaseURL, "/") + "/api/files/" + hash + ".png"
 }
 
 // errMessageForClient extracts a safe human message from a Printful error

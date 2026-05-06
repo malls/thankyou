@@ -100,7 +100,11 @@ func newTestHandlers(t *testing.T, stub *stubPrintful) *Handlers {
 	}
 	t.Cleanup(func() { _ = rdr.Close() })
 
-	h := &Handlers{Renderer: rdr, Store: store}
+	h := &Handlers{
+		Renderer:      rdr,
+		Store:         store,
+		PublicBaseURL: "https://public.example.com",
+	}
 	if stub != nil {
 		c, err := printful.New(printful.Config{
 			Token:   "test-token",
@@ -110,8 +114,7 @@ func newTestHandlers(t *testing.T, stub *stubPrintful) *Handlers {
 			t.Fatalf("printful.New: %v", err)
 		}
 		h.Printful = &PrintfulSetup{
-			Client:        c,
-			PublicBaseURL: "https://public.example.com",
+			Client: c,
 		}
 	}
 	return h
@@ -480,31 +483,59 @@ func TestExternalIDForHashSmoke(t *testing.T) {
 }
 
 // TestPublicFileURLPrefersConfigured covers the URL-construction logic:
-// PUBLIC_BASE_URL wins; absent it, fall back to inbound Host.
+// the configured PUBLIC_BASE_URL on Handlers is used verbatim.
 func TestPublicFileURLPrefersConfigured(t *testing.T) {
-	h := &Handlers{
-		Printful: &PrintfulSetup{PublicBaseURL: "https://configured.example.com"},
-	}
-	req := httptest.NewRequest("POST", "/api/printful/products", nil)
-	req.Host = "should-be-ignored.example.com"
-	got := h.publicFileURL(req, "abcd")
+	h := &Handlers{PublicBaseURL: "https://configured.example.com"}
+	got := h.publicFileURL("abcd")
 	want := "https://configured.example.com/api/files/abcd.png"
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
 
-func TestPublicFileURLFallsBackToHost(t *testing.T) {
-	h := &Handlers{
-		Printful: &PrintfulSetup{},
-	}
+// TestPublicFileURLIgnoresHostHeader is the regression guard for the original
+// vulnerability: even when a request carries a hostile Host: header, the
+// helper must use the boot-configured base, not the request. The helper no
+// longer takes *http.Request, but we still want this test to lock the
+// invariant that the request can't influence the URL.
+func TestPublicFileURLIgnoresHostHeader(t *testing.T) {
+	h := &Handlers{PublicBaseURL: "https://configured.example.com"}
+	// Construct a hostile request to make the intent visible. The helper's
+	// signature does not allow it to be consulted, which is precisely the
+	// guarantee this test asserts.
 	req := httptest.NewRequest("POST", "/api/printful/products", nil)
-	req.Host = "tunnel.ngrok.app"
+	req.Host = "evil.example"
 	req.Header.Set("X-Forwarded-Proto", "https")
-	got := h.publicFileURL(req, "abcd")
-	want := "https://tunnel.ngrok.app/api/files/abcd.png"
+	_ = req // helper takes no request — the hostile header cannot reach it.
+	got := h.publicFileURL("abcd")
+	want := "https://configured.example.com/api/files/abcd.png"
 	if got != want {
-		t.Errorf("got %q, want %q", got, want)
+		t.Errorf("got %q, want %q (host header must not influence the URL)", got, want)
+	}
+}
+
+// TestPublicFileURLTrailingSlash asserts both shapes (with and without a
+// trailing slash on PUBLIC_BASE_URL) produce identical helper output.
+func TestPublicFileURLTrailingSlash(t *testing.T) {
+	for _, base := range []string{"https://x.com", "https://x.com/"} {
+		h := &Handlers{PublicBaseURL: base}
+		got := h.publicFileURL("abcd")
+		want := "https://x.com/api/files/abcd.png"
+		if got != want {
+			t.Errorf("base=%q: got %q, want %q", base, got, want)
+		}
+	}
+}
+
+// TestPublicBaseURLTrailingSlash mirrors the above for the Stripe-side helper.
+func TestPublicBaseURLTrailingSlash(t *testing.T) {
+	for _, base := range []string{"https://x.com", "https://x.com/"} {
+		h := &Handlers{PublicBaseURL: base}
+		got := h.publicBaseURL()
+		want := "https://x.com"
+		if got != want {
+			t.Errorf("base=%q: got %q, want %q", base, got, want)
+		}
 	}
 }
 
