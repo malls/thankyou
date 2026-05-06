@@ -107,7 +107,7 @@ func (h *Handlers) Render(w http.ResponseWriter, r *http.Request) {
 	// one render call and one disk write. Both responses get the same
 	// file_id and a successful URL.
 	_, err = h.Store.SaveDedup(hash, func() ([]byte, error) {
-		return h.Renderer.RenderPNG(inputs)
+		return h.Renderer.RenderPNG(r.Context(), inputs)
 	})
 	if err != nil {
 		h.logf("render: hash=%s err=%v", hash, err)

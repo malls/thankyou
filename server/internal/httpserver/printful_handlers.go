@@ -159,7 +159,7 @@ func (h *Handlers) CreateTShirt(w http.ResponseWriter, r *http.Request) {
 	// Render+save up front so even the 503 path can hand the client a
 	// usable file_id/file_url. Plan §4: 503 body must include them.
 	if _, err := h.Store.SaveDedup(hash, func() ([]byte, error) {
-		return h.Renderer.RenderPNG(inputs)
+		return h.Renderer.RenderPNG(r.Context(), inputs)
 	}); err != nil {
 		h.logf("printful/products: hash=%s render err=%v", hash, err)
 		writeError(w, http.StatusInternalServerError, "render_failed", "", "render failed")
@@ -363,7 +363,7 @@ func (h *Handlers) CreateMockupOnly(w http.ResponseWriter, r *http.Request) {
 		}
 		hash = render.Hash(inputs)
 		if _, err := h.Store.SaveDedup(hash, func() ([]byte, error) {
-			return h.Renderer.RenderPNG(inputs)
+			return h.Renderer.RenderPNG(r.Context(), inputs)
 		}); err != nil {
 			h.logf("printful/mockup: hash=%s render err=%v", hash, err)
 			writeError(w, http.StatusInternalServerError, "render_failed", "", "render failed")

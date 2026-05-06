@@ -151,7 +151,7 @@ func (h *Handlers) StartCheckout(w http.ResponseWriter, r *http.Request) {
 
 	hash := render.Hash(inputs)
 	if _, err := h.Store.SaveDedup(hash, func() ([]byte, error) {
-		return h.Renderer.RenderPNG(inputs)
+		return h.Renderer.RenderPNG(r.Context(), inputs)
 	}); err != nil {
 		h.logf("checkout/start: hash=%s render err=%v", hash, err)
 		writeError(w, http.StatusInternalServerError, "render_failed", "", "render failed")

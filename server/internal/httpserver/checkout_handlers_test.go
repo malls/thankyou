@@ -104,7 +104,7 @@ func newCheckoutHandlers(t *testing.T, sb *stubBackends, includeStripe bool, inc
 	if err != nil {
 		t.Fatalf("files.New: %v", err)
 	}
-	rdr, err := render.NewRenderer(context.Background())
+	rdr, err := render.NewRenderer(context.Background(), 1)
 	if err != nil {
 		t.Fatalf("render.NewRenderer: %v", err)
 	}

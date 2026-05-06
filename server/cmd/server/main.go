@@ -8,6 +8,12 @@
 //
 //	PORT                  — listen port; defaults to 8080.
 //	DATA_DIR              — directory for saved PNGs; defaults to ./data/files.
+//	RENDERER_POOL_SIZE    — number of parallel render slots; defaults to 4.
+//	                        Each slot owns its own wasm runtime + font db
+//	                        (~10–30MB resident). Raise this if /api/render,
+//	                        /api/printful/products, or /api/checkout/start
+//	                        start queueing under load. Invalid or non-positive
+//	                        values are clamped to 1 with a warning log.
 //	PRINTFUL_TOKEN        — Printful bearer token. When unset, the
 //	                        /api/printful/* and /api/checkout/* routes
 //	                        return 503 with a typed error code.
@@ -52,6 +58,7 @@ func main() {
 
 	port := envOr("PORT", "8080")
 	dataDir := envOr("DATA_DIR", "./data/files")
+	poolSize := rendererPoolSize(logger)
 
 	// Read PUBLIC_BASE_URL alongside the upstream credentials so we can fail
 	// fast at boot when the combination is unsafe. The Host-header fallback
@@ -79,10 +86,14 @@ func main() {
 	logger.Printf("file store rooted at %s", store.Dir())
 
 	// Boot the renderer up front so font-load failures are fatal at startup
-	// rather than per-request 500s. The wasm runtime takes ~50ms to spin up.
-	renderer, err := render.NewRenderer(context.Background())
+	// rather than per-request 500s. The wasm runtime takes ~50ms per slot.
+	renderer, err := render.NewRenderer(context.Background(), poolSize)
 	if err != nil {
 		logger.Fatalf("init renderer: %v", err)
+	}
+	logger.Printf("renderer pool size: %d", poolSize)
+	if poolSize == 1 {
+		logger.Printf("renderer pool size: 1 (no parallelism; raise RENDERER_POOL_SIZE for throughput)")
 	}
 	defer func() {
 		if err := renderer.Close(); err != nil {
@@ -154,6 +165,29 @@ func envOr(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+// rendererPoolSize parses RENDERER_POOL_SIZE with a default of 4. Invalid or
+// non-positive values clamp to 1 with a warning log — a typo shouldn't take
+// the server down. The default is memory-bound (each slot carries its own
+// wasm runtime + font db, ~10–30MB resident), so 4 is a sensible fixed
+// default; operators raise it explicitly when render throughput matters.
+func rendererPoolSize(logger *log.Logger) int {
+	const defaultSize = 4
+	v := os.Getenv("RENDERER_POOL_SIZE")
+	if v == "" {
+		return defaultSize
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		logger.Printf("WARNING: RENDERER_POOL_SIZE=%q is not an integer; clamping to 1", v)
+		return 1
+	}
+	if n <= 0 {
+		logger.Printf("WARNING: RENDERER_POOL_SIZE=%d is not positive; clamping to 1", n)
+		return 1
+	}
+	return n
 }
 
 // validatePublicBaseURL fails closed when PUBLIC_BASE_URL is empty while
