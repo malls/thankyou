@@ -95,7 +95,21 @@
       "Bash(rm -rf /tmp/tybsmoke /tmp/tyb_server && git status)",
       "Bash(PRINTFUL_TOKEN=foo go run ./cmd/server)",
       "Bash(echo \"exit: $?\")",
-      "Bash(STRIPE_SECRET_KEY=sk_test_x go run ./cmd/server)"
+      "Bash(STRIPE_SECRET_KEY=sk_test_x go run ./cmd/server)",
+      "Bash(find /Users/forrest/go/pkg/mod -maxdepth 5 -path \"*kanrichan/resvg-go*\" -type d 2>&1 | head -10)",
+      "Read(//Users/forrest/go/pkg/mod/**)",
+      "Bash(lsof -i :8080 -sTCP:LISTEN)",
+      "Bash(jobs -l)",
+      "Bash(pkill -f tyb-server)",
+      "Bash(chmod +x /tmp/smoke.sh)",
+      "Bash(/tmp/smoke.sh 4)",
+      "Bash(/tmp/smoke.sh 1)",
+      "Bash(pkill -f \"smoke.sh\")",
+      "Bash(pkill -f \"tyb-server\")",
+      "Bash(lsof -nP -iTCP:8080 -sTCP:LISTEN)",
+      "Bash(lsof -nP -iTCP:8090 -sTCP:LISTEN)",
+      "Bash(lsof -nP -iTCP:8090,8091,8092 -sTCP:LISTEN)",
+      "Bash(lsof -nP -iTCP:8092 -sTCP:LISTEN)"
     ],
     "additionalDirectories": [
       "/private/tmp/tybsmoke"
