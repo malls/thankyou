@@ -75,6 +75,20 @@ window.onload = function () {
 		.getElementById('export')
 		.addEventListener('click', createImage);
 
+	// Hide the image overlay when the user navigates back from it. The
+	// input keyup handlers also call history.pushState with state === null,
+	// so we only react when the overlay is currently showing AND the popped
+	// state isn't ours — that combination uniquely identifies "back button
+	// pressed while the image view was up".
+	window.addEventListener('popstate', event => {
+		const view = document.getElementById('image-view');
+		if (view && !view.hidden && (!event.state || event.state.view !== 'image')) {
+			view.hidden = true;
+			const img = document.getElementById('image-view-img');
+			if (img) img.removeAttribute('src');
+		}
+	});
+
 	const buyShirt = document.getElementById('buy-shirt');
 	if (buyShirt) {
 		buyShirt.addEventListener('click', createTShirt);
@@ -303,8 +317,17 @@ window.onload = function () {
 
 		image.onload = () => {
 			context.drawImage(image, X_IMAGE_OFFSET, 0);
-			let png = canvas.toDataURL('image/png');
-			document.body.innerHTML = '<div class="scroller"><img src="' + png + '"/></div>';
+			const png = canvas.toDataURL('image/png');
+
+			const view = document.getElementById('image-view');
+			const img = document.getElementById('image-view-img');
+			img.src = png;
+			view.hidden = false;
+
+			// Push a history entry so the browser back button has something
+			// to pop. URL stays the same — the image isn't deep-linkable;
+			// the state marker is what popstate reacts to.
+			history.pushState({ view: 'image' }, '', window.location.href);
 		}
 		image.src = blobUrl;
 
