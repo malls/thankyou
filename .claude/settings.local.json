@@ -109,7 +109,15 @@
       "Bash(lsof -nP -iTCP:8080 -sTCP:LISTEN)",
       "Bash(lsof -nP -iTCP:8090 -sTCP:LISTEN)",
       "Bash(lsof -nP -iTCP:8090,8091,8092 -sTCP:LISTEN)",
-      "Bash(lsof -nP -iTCP:8092 -sTCP:LISTEN)"
+      "Bash(lsof -nP -iTCP:8092 -sTCP:LISTEN)",
+      "Bash(DATA_DIR=/tmp/tyb13-review-data PORT=8182 /tmp/tyb-server-review)",
+      "Bash(echo \"PID=$!\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:8182/)",
+      "Bash(curl -s http://localhost:8182/)",
+      "Bash(curl -s http://localhost:8182/style.css)",
+      "Bash(curl -s http://localhost:8182/script.js)",
+      "Bash(kill 62334)",
+      "Bash(wait)"
     ],
     "additionalDirectories": [
       "/private/tmp/tybsmoke"
