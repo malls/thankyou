@@ -41,6 +41,15 @@ func NewRouter(h *Handlers) (http.Handler, error) {
 	mux.HandleFunc("POST /api/checkout/start", h.StartCheckout)
 	mux.HandleFunc("POST /api/stripe/webhook", h.StripeWebhook)
 
+	// Extension-less /checkout maps to checkout.html. The static FileServer
+	// would happily serve /checkout.html, but humans type /checkout and we
+	// want the cleaner URL. http.ServeFileFS (Go 1.22+) handles MIME +
+	// caching headers identically to FileServer. Must be registered before
+	// the "/" fall-through so the mux dispatches it explicitly.
+	mux.HandleFunc("GET /checkout", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFileFS(w, r, publicFS, "checkout.html")
+	})
+
 	// The fall-through route serves the static site. Anything that didn't
 	// match an /api/ route or /healthz lands here. http.FileServer handles
 	// the "/" -> "index.html" redirect and 404s for missing files.
