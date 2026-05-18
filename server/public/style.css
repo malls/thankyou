@@ -85,6 +85,54 @@ svg {
 	max-width: 400px;
 }
 
+/* Checkout page layout. The generator (/) is a free-form editor — full
+ * viewport, no scrolling. The checkout page (/checkout) is a static review
+ * screen and needs vertical scrolling on small viewports, so we override
+ * the body overflow rule and stack the preview above the details column. */
+body.checkout-page {
+	overflow: auto;
+	padding: 20px;
+	box-sizing: border-box;
+}
+
+.back-link {
+	display: inline-block;
+	font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;
+	color: red;
+	text-decoration: none;
+	font-size: 1.1em;
+	margin-bottom: 10px;
+}
+
+.back-link:hover {
+	text-decoration: underline;
+}
+
+.checkout-preview {
+	margin: 10px 0;
+}
+
+.checkout-details {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-top: 20px;
+	max-width: 420px;
+}
+
+.checkout-price {
+	font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;
+	color: red;
+	font-size: 2.5em;
+	line-height: 1;
+}
+
+.checkout-shipping {
+	font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;
+	color: black;
+	font-size: 1.1em;
+}
+
 .thanks-state {
 	padding: 40px 20px;
 	font-family: 'Helvetica Black', Helvetica, Arial, sans-serif;

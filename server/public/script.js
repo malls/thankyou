@@ -17,63 +17,74 @@ window.onload = function () {
 		// banner sits above the editor.
 	}
 
-	init();
+	// Page split: the generator page (/) and the checkout page (/checkout)
+	// share one script.js. We branch on DOM presence — #buy-shirt-final only
+	// exists on /checkout, and the editable inputs (#main-input,
+	// #highlight-input) only exist on /. init() touches those inputs
+	// unconditionally so we can't run it on /checkout; populatePreview() is
+	// the read-only equivalent that drives the SVG from query params alone.
+	const onCheckoutPage = !!document.getElementById('buy-shirt-final');
 
-	document
-		.querySelector('#main-input')
-		.addEventListener('keyup', event => {
-			const highlightInputValue = document.querySelector('#highlight-input').value;
-			const newMainValue = event.target.value;
+	if (onCheckoutPage) {
+		populatePreview();
+	} else {
+		init();
 
-			if (!newMainValue) {
-				searchParams.delete('text');
+		document
+			.querySelector('#main-input')
+			.addEventListener('keyup', event => {
+				const highlightInputValue = document.querySelector('#highlight-input').value;
+				const newMainValue = event.target.value;
 
-				let newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
-				history.pushState(null, '', newRelativePathQuery);
+				if (!newMainValue) {
+					searchParams.delete('text');
 
-				if (!highlightInputValue) {
-					return resetAll('.main-text');
-				} else if (highlightInputValue) {
-					return resetAll('.hollow');
+					let newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+					history.pushState(null, '', newRelativePathQuery);
+
+					if (!highlightInputValue) {
+						return resetAll('.main-text');
+					} else if (highlightInputValue) {
+						return resetAll('.hollow');
+					}
 				}
-			}
 
-			let selector = highlightInputValue ? '.hollow' : '.main-text';
+				let selector = highlightInputValue ? '.hollow' : '.main-text';
 
-			Array
-				.from(document.querySelectorAll(selector))
-				.forEach(t => t.textContent = newMainValue);
+				Array
+					.from(document.querySelectorAll(selector))
+					.forEach(t => t.textContent = newMainValue);
 
-			searchParams.set('text', newMainValue);
-			var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
-			history.pushState(null, '', newRelativePathQuery);
-			resizeSVG();
-		});
-
-	document
-		.querySelector('#highlight-input')
-		.addEventListener('keyup', event => {
-			if (event.target.value) {
-				document.querySelector('#filled-text').textContent = event.target.value;
-				searchParams.set('middletext', event.target.value);
-				let newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
-				history.pushState(null, '', newRelativePathQuery);
-
-				resizeSVG();
-			} else if (!event.target.value && document.querySelector('.main-text').textContent) {
-				document.querySelector('#filled-text').textContent = document.querySelector('.main-text').innerHTML;
-				searchParams.delete('middletext', '');
-				let newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+				searchParams.set('text', newMainValue);
+				var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
 				history.pushState(null, '', newRelativePathQuery);
 				resizeSVG();
-			} else {
-				resetAll();
-			}
-		});
+			});
 
-	document
-		.getElementById('export')
-		.addEventListener('click', createImage);
+		document
+			.querySelector('#highlight-input')
+			.addEventListener('keyup', event => {
+				if (event.target.value) {
+					document.querySelector('#filled-text').textContent = event.target.value;
+					searchParams.set('middletext', event.target.value);
+					let newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+					history.pushState(null, '', newRelativePathQuery);
+
+					resizeSVG();
+				} else if (!event.target.value && document.querySelector('.main-text').textContent) {
+					document.querySelector('#filled-text').textContent = document.querySelector('.main-text').innerHTML;
+					searchParams.delete('middletext', '');
+					let newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+					history.pushState(null, '', newRelativePathQuery);
+					resizeSVG();
+				} else {
+					resetAll();
+				}
+			});
+
+		const exportBtn = document.getElementById('export');
+		if (exportBtn) exportBtn.addEventListener('click', createImage);
+	}
 
 	// Hide the image overlay when the user navigates back from it. The
 	// input keyup handlers also call history.pushState with state === null,
@@ -92,6 +103,11 @@ window.onload = function () {
 	const buyShirt = document.getElementById('buy-shirt');
 	if (buyShirt) {
 		buyShirt.addEventListener('click', createTShirt);
+	}
+
+	const finalBuy = document.getElementById('buy-shirt-final');
+	if (finalBuy) {
+		finalBuy.addEventListener('click', startCheckout);
 	}
 
 	function init() {
@@ -125,6 +141,28 @@ window.onload = function () {
 		resizeSVG();
 	}
 
+	// populatePreview is the checkout-page equivalent of init(): it reads the
+	// design text from ?text and ?middletext, drives the SVG tspans, and
+	// resizes. It deliberately does not touch any editable inputs — there are
+	// none on /checkout. When neither param is set, the SVG's hardcoded
+	// THANK YOU default stays in place.
+	function populatePreview() {
+		const text = searchParams.get('text');
+		const middletext = searchParams.get('middletext');
+
+		if (text) {
+			Array
+				.from(document.querySelectorAll('.main-text'))
+				.forEach(t => t.textContent = text);
+		}
+		if (middletext) {
+			const filled = document.getElementById('filled-text');
+			if (filled) filled.textContent = middletext;
+		}
+
+		resizeSVG();
+	}
+
 	function resetAll(selector) {
 		Array
 			.from(document.querySelectorAll(selector))
@@ -146,7 +184,8 @@ window.onload = function () {
 	// readVariantCatalog parses the embedded <script id="variant-catalog">
 	// JSON. Returned shape: {"S":4011,"M":4012,...}. When the catalog isn't
 	// present (older builds) or fails to parse, returns null and the buy
-	// flow shows a clear error.
+	// flow shows a clear error. Only exists on /checkout — on / the script
+	// tag is absent and this returns null (no caller on / either, so fine).
 	function readVariantCatalog() {
 		const el = document.getElementById('variant-catalog');
 		if (!el) return null;
@@ -225,20 +264,35 @@ window.onload = function () {
 		}[ch]));
 	}
 
-	// createTShirt POSTs the current text + selected variant to
-	// /api/checkout/start. The server renders the PNG, creates a Printful
-	// sync_product, opens a Stripe Checkout Session, and returns the
-	// checkout_url for us to redirect to. All upstream failures are
-	// surfaced via inline #buy-error rather than blocking alert()s.
+	// createTShirt is the generator-page Buy handler. Instead of POSTing
+	// directly to /api/checkout/start, it now navigates the browser to
+	// /checkout with the current design as query params. The checkout page
+	// owns size selection and the final fetch — see startCheckout below.
+	function createTShirt() {
+		const main = document.querySelector('#main-input').value || '';
+		const middle = document.querySelector('#highlight-input').value || '';
+		const params = new URLSearchParams();
+		if (main) params.set('text', main);
+		if (middle) params.set('middletext', middle);
+		const qs = params.toString();
+		window.location.href = '/checkout' + (qs ? '?' + qs : '');
+	}
+
+	// startCheckout is the /checkout page's final Buy handler. POSTs the
+	// design + variant id to /api/checkout/start; the server renders the
+	// PNG, creates a Printful sync_product, opens a Stripe Checkout Session,
+	// and returns the checkout_url for us to redirect to. All upstream
+	// failures are surfaced via inline #buy-error rather than blocking
+	// alert()s.
 	let renderInflight = false;
-	async function createTShirt() {
+	async function startCheckout() {
 		if (renderInflight) return;
 		renderInflight = true;
 		clearError();
-		const button = document.getElementById('buy-shirt');
+		const button = document.getElementById('buy-shirt-final');
 		if (button) button.classList.add('is-loading');
-		const main = document.querySelector('#main-input').value || '';
-		const middle = document.querySelector('#highlight-input').value || '';
+		const main = searchParams.get('text') || '';
+		const middle = searchParams.get('middletext') || '';
 		const variantID = readSelectedVariantID();
 		try {
 			const resp = await fetch('/api/checkout/start', {
@@ -287,7 +341,7 @@ window.onload = function () {
 			}
 			window.location = data.checkout_url;
 		} catch (e) {
-			console.error('createTShirt error', e);
+			console.error('startCheckout error', e);
 			showError('Network error. Please try again.');
 		} finally {
 			renderInflight = false;

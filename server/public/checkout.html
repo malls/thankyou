@@ -2,57 +2,23 @@
 <html lang="en">
 
 <head>
-	<title>Thank You</title>
+	<title>Checkout — Thank You Bag</title>
 
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width" />
-	<meta name="description" content="Create Thank You shopping bag style text">
+	<meta name="description" content="Checkout — Thank You Bag" />
 
-	<meta property="og:type" content="website" />
-
-	<meta property="og:title" content="Thank You Bag Generator" />
-	<meta property="og:description" content="Generates text in the style of plastic 'thank you' shopping bags" />
-	<meta property="og:image" content="https://thankyoubag.online/splash.png" />
-	<meta property="og:image:secure_url" content="https://thankyoubag.online/splash.png" />
-	<meta property="og:image:type" content="image/png" />
-	<meta property="og:image:width" content="1200" />
-	<meta property="og:image:height" content="630" />
-	<meta property="og:url" content="https://thankyoubag.online" />
-	<meta property="og:site_name" content="Thank You Bag Generator" />
-
-	<meta name="twitter:card" content="summary_large_image">
-	</meta>
-	<meta name="twitter:title" content="Thank You Bag Generator">
-	<meta name="twitter:description" content="Generates text in the style of plastic 'thank you' shopping bags">
-	<meta name="twitter:image" content="https://thankyoubag.online/splash.png">
-	<meta name="twitter:image:alt"
-		content="7 lines of text reading 'thank you' in red in the style of plastic popular shopping bags'">
-	<meta name="twitter:site" content="@forrestalmasi">
-	<meta name="twitter:creator" content="@forrestalmasi">
-
-	<link rel="canonical" href="https://thankyoubag.online/">
+	<link rel="canonical" href="https://thankyoubag.online/checkout">
 	<link rel="icon" href="./favicon.ico" sizes="any">
 	<link rel="stylesheet" href="./style.css" />
 
 	<script src="./script.js"></script>
 </head>
 
-<body>
-	<label for="hollow-text">Main Text</label>
-	<br>
-	<input type="text" id="main-input" placeholder="Enter Your Text Here" maxlength="10" />
-	<br>
-	<label for="highlight-text">Solid Middle Text</label>
-	<br>
-	<input type="text" id="highlight-input" placeholder="Optional" maxlength="10" />
-	<br>
-	<br>
+<body class="checkout-page">
+	<a href="/" class="back-link">← Edit design</a>
 
-	<div id="export" class="styled-button">Save Image</div>
-	<div id="buy-shirt" class="styled-button">Buy a Shirt</div>
-	<br>
-	<br>
-
+	<div class="checkout-preview">
 	<svg xmlns="http://www.w3.org/2000/svg">
 		<style>
 			@font-face {
@@ -100,10 +66,47 @@
 		</text>
 
 	</svg>
-
-	<div id="image-view" hidden>
-		<img id="image-view-img" alt="Generated thank you image" />
 	</div>
+
+	<div class="checkout-details">
+		<div class="checkout-price">$30 USD</div>
+		<div class="checkout-shipping">Free worldwide shipping</div>
+
+		<fieldset id="size-picker" class="size-picker">
+			<legend>Size</legend>
+			<label><input type="radio" name="size" value="S"> S</label>
+			<label><input type="radio" name="size" value="M" checked> M</label>
+			<label><input type="radio" name="size" value="L"> L</label>
+			<label><input type="radio" name="size" value="XL"> XL</label>
+		</fieldset>
+
+		<div id="buy-shirt-final" class="styled-button">Buy a Shirt</div>
+		<div id="buy-error" class="buy-error" hidden></div>
+	</div>
+
+	<!--
+		The $30 price above is informational only. The server is the source of
+		truth for the actual charge — either STRIPE_PRICE_USD_CENTS or
+		printful.DefaultVariants[].RetailPrice. If you change the price, change
+		it server-side first and update this number to match.
+	-->
+
+	<!--
+		Variant catalog the size-picker resolves to a Printful variant_id.
+		Filled in below by the server-time embed (or hand-authored static
+		copy below). Keep this in sync with server/internal/printful/catalog.go;
+		when the human fills in real Printful variant ids, update this map.
+		The placeholder 0s mean "catalog incomplete" — the server will 503
+		with variant_catalog_incomplete and the front-end shows an error.
+	-->
+	<script id="variant-catalog" type="application/json">
+		{
+			"S": 0,
+			"M": 0,
+			"L": 0,
+			"XL": 0
+		}
+	</script>
 </body>
 
 </html>
