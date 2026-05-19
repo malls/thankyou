@@ -1,0 +1,32 @@
+{
+  "assigned_to": null,
+  "branch_links": [],
+  "comment_count": 3,
+  "complexity": null,
+  "created_at": "2026-05-18T20:31:03Z",
+  "created_by": "dashboard:web",
+  "custom_fields": {},
+  "description": "There should be no size selector on the main page, nor error container. When a user clicks Buy A Shirt, they should be redirected to a new page that has checkout info and a size selector",
+  "done_at": "2026-05-19T00:15:17Z",
+  "evidence_refs": [
+    {
+      "id": "ev_01KRYSCDJT8RAEF5ANHJESGTEC",
+      "role": "review",
+      "source_type": "comment"
+    }
+  ],
+  "id": "task_01KRYCHXAWPP681YY7V8BXC2DY",
+  "last_event_id": "ev_01KRYSCG8SK4QQAPG6YES0Q8ZA",
+  "last_status_changed_at": "2026-05-19T00:15:17Z",
+  "priority": "medium",
+  "relationships_out": [],
+  "reopened_count": 0,
+  "schema_version": 1,
+  "short_id": "TYB-23",
+  "status": "done",
+  "tags": null,
+  "title": "Buy a shirt should be a seprate page",
+  "type": "task",
+  "updated_at": "2026-05-19T00:15:17Z",
+  "urgency": null
+}
